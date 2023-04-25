@@ -5,6 +5,7 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>PaintProject</RootNamespace>
     <EnableDefaultItems>False</EnableDefaultItems>
+    <BaseOutputPath></BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>

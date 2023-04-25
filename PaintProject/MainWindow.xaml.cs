@@ -11,9 +11,6 @@ using System.Windows.Media;
 
 namespace PaintProject
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         Dictionary<string, IShape> _abilities =new Dictionary<string, IShape>();
@@ -71,18 +68,13 @@ namespace PaintProject
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ////// Tự scan chương trình nạp lên các khả năng của mình
             var domain = AppDomain.CurrentDomain;
-            var folder = domain.BaseDirectory + "abilities";
+            var folder = domain.BaseDirectory;
 
             var folderInfo = new DirectoryInfo(folder);
-            if (!folderInfo.Exists)
-            {
-                MessageBox.Show("Abilities folder not found", "Folder not found", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+
             Debug.WriteLine($"{folderInfo}");
-            var dllFiles = folderInfo.GetFiles("*.dll");
+            var dllFiles = folderInfo.GetFiles("*Ability*.dll");
             Debug.WriteLine(dllFiles.Length);
             foreach (var dll in dllFiles)
             {
@@ -91,7 +83,8 @@ namespace PaintProject
                 foreach (var type in types)
                 {
                     if (type.IsClass &&
-                        typeof(IShape).IsAssignableFrom(type)){
+                        typeof(IShape).IsAssignableFrom(type))
+                    {
                         var shape = Activator.CreateInstance(type) as IShape;
                         _abilities.Add(shape!.name, shape);
                     }
@@ -101,7 +94,7 @@ namespace PaintProject
             foreach (var ability in _abilities)
             {
                 //2
-                
+
             }
         }
     }

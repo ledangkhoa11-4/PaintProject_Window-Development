@@ -1,0 +1,61 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>PaintProject</RootNamespace>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Svg.Skia" Version="0.5.18" />
+    <PackageReference Include="Telerik.UI.for.Wpf.60.Xaml" Version="2022.1.222" />
+  </ItemGroup>
+  
+  <ItemGroup>
+  <ApplicationDefinition Include="App.xaml">
+    <Generator>MSBuild:Compile</Generator>
+    <SubType>Designer</SubType>
+  </ApplicationDefinition>
+  <Page Include="MainWindow.xaml">
+    <Generator>MSBuild:Compile</Generator>
+    <SubType>Designer</SubType>
+  </Page>
+  <Compile Include="App.xaml.cs">
+    <DependentUpon>App.xaml</DependentUpon>
+    <SubType>Code</SubType>
+  </Compile>
+  <Compile Include="IShape.cs" />
+  <Compile Include="MainWindow.xaml.cs">
+    <DependentUpon>MainWindow.xaml</DependentUpon>
+    <SubType>Code</SubType>
+  </Compile>
+</ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="Fonts\Lato-Black.ttf" />
+    <Content Include="Fonts\Lato-BlackItalic.ttf" />
+    <Content Include="Fonts\Lato-Bold.ttf" />
+    <Content Include="Fonts\Lato-BoldItalic.ttf" />
+    <Content Include="Fonts\Lato-Italic.ttf" />
+    <Content Include="Fonts\Lato-Light.ttf" />
+    <Content Include="Fonts\Lato-LightItalic.ttf" />
+    <Content Include="Fonts\Lato-Regular.ttf" />
+    <Content Include="Fonts\Lato-Thin.ttf" />
+    <Content Include="Fonts\Lato-ThinItalic.ttf" />
+    <Content Include="Fonts\OFL.txt" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Resource Include="shapes_icon\ellipse_16.png" />
+    <Resource Include="shapes_icon\ellipse_32.png" />
+    <Resource Include="shapes_icon\line_16.png" />
+    <Resource Include="shapes_icon\line_32.png" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Resource Include="shapes_icon\rectangle_16.png" />
+    <Resource Include="shapes_icon\rectangle_32.png" />
+  </ItemGroup>
+
+</Project>

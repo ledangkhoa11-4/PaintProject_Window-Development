@@ -1,0 +1,133 @@
+﻿<Window x:Class="PaintProject.MainWindow"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
+                xmlns:svg="http://schemas.squidex.io/schemas/svg"
+                Title="MainWindow" Height="900" Width="1400"
+                WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded">
+    <DockPanel LastChildFill="True">
+        <telerik:RadRibbonView Panel.ZIndex="99999" DockPanel.Dock="Top" telerik:StyleManager.Theme="Office2019" ApplicationName="Paint Application" TitleBarVisibility="Collapsed">
+            <telerik:RadRibbonView.Items>
+                <telerik:RadRibbonTab Header="Home">
+                    <telerik:RadRibbonGroup Header="Colors">
+                        <telerik:RadColorPicker x:Name="colorPicker" Width="146" telerik:StyleManager.Theme="VisualStudio2019" Background="#FFF1F1F1">
+                            <telerik:RadColorPicker.ContentTemplate>
+                                <DataTemplate>
+                                    <Path StrokeThickness="2" Height="28" Stretch="Fill" Width="91" HorizontalAlignment="Left" VerticalAlignment="Center" Canvas.Left="10">
+                                        <Path.Stroke>
+                                            <SolidColorBrush Color="{Binding ElementName=colorPicker, Path=SelectedColor}"></SolidColorBrush>
+                                        </Path.Stroke>
+                                        <Path.Data>
+                                            <PathGeometry>
+                                                <PathGeometry.Figures>
+                                                    <PathFigure StartPoint="50,100">
+                                                        <PathFigure.Segments>
+                                                            <BezierSegment Point1="100,0" Point2="200,200" Point3="250,100" />
+                                                        </PathFigure.Segments>
+                                                    </PathFigure>
+                                                </PathGeometry.Figures>
+                                            </PathGeometry>
+                                        </Path.Data>
+                                    </Path>
+                                </DataTemplate>
+                            </telerik:RadColorPicker.ContentTemplate>
+                        </telerik:RadColorPicker>
+                    </telerik:RadRibbonGroup>
+                    <telerik:RadRibbonGroup Header="Weight">
+                        <telerik:RadRibbonDropDownButton   Text="1px" VerticalAlignment="Center" telerik:StyleManager.Theme="Material" Width="100">
+                            <telerik:RadRibbonDropDownButton.DropDownContent>
+                                <ListBox Width="150">
+                                    <ListBoxItem Height="30">
+                                        <ListBoxItem.Content>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock>1px</TextBlock>
+                                                <Line VerticalAlignment="Center"  X1="10" Y1="0" X2="90" Y2="0" Stroke="Black" StrokeThickness="1"/>
+                                            </StackPanel>
+                                        </ListBoxItem.Content>
+                                    </ListBoxItem>
+                                    <ListBoxItem Height="30">
+                                        <ListBoxItem.Content>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock>3px</TextBlock>
+                                                <Line VerticalAlignment="Center"  X1="10" Y1="0" X2="90" Y2="0" Stroke="Black" StrokeThickness="3"/>
+                                            </StackPanel>
+                                        </ListBoxItem.Content>
+                                    </ListBoxItem>
+                                    <ListBoxItem Height="30">
+                                        <ListBoxItem.Content>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock>5px</TextBlock>
+                                                <Line VerticalAlignment="Center"  X1="10" Y1="0" X2="90" Y2="0" Stroke="Black" StrokeThickness="5"/>
+                                            </StackPanel>
+                                        </ListBoxItem.Content>
+                                    </ListBoxItem>
+                                    <ListBoxItem Height="30">
+                                        <ListBoxItem.Content>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock>8px</TextBlock>
+                                                <Line VerticalAlignment="Center"  X1="10" Y1="0" X2="90" Y2="0" Stroke="Black" StrokeThickness="8"/>
+                                            </StackPanel>
+                                        </ListBoxItem.Content>
+                                    </ListBoxItem>
+
+                                </ListBox>
+                            </telerik:RadRibbonDropDownButton.DropDownContent>
+                        </telerik:RadRibbonDropDownButton>
+                    </telerik:RadRibbonGroup>
+                    <telerik:RadRibbonGroup Header="Shapes">
+                        <telerik:RadRibbonGroup >
+                            <telerik:RadRibbonRadioButton CollapseToMedium="Never"  
+                              CollapseToSmall="WhenGroupIsMedium" 
+                              IsAutoSize="True" 
+                              LargeImage="shapes_icon/rectangle_32.png" 
+                              Size="Large" 
+                              SmallImage="shapes_icon/rectangle_16.png" 
+                              Text="Rectangle" telerik:StyleManager.Theme="Material" />
+                            <telerik:RadRibbonRadioButton CollapseToMedium="Never"  
+                              CollapseToSmall="WhenGroupIsMedium" 
+                              IsAutoSize="True" 
+                              LargeImage="shapes_icon/line_32.png" 
+                              Size="Large" 
+                              IsChecked ="True"
+                              SmallImage="shapes_icon/line_16.png" 
+                              Text="Line" telerik:StyleManager.Theme="Material" />
+                            <telerik:RadRibbonRadioButton CollapseToMedium="Never"  
+                              CollapseToSmall="WhenGroupIsMedium" 
+                              IsAutoSize="True" 
+                              LargeImage="shapes_icon/ellipse_32.png" 
+                              Size="Large" 
+                              SmallImage="shapes_icon/ellipse_16.png" 
+                              Text="Ellipse" telerik:StyleManager.Theme="Material" />
+                        </telerik:RadRibbonGroup>
+                    </telerik:RadRibbonGroup>
+                    <telerik:RadRibbonGroup Header="Stroke type" Width="128">
+
+
+                    </telerik:RadRibbonGroup>
+                    <telerik:RadRibbonGroup Header="Tools" Width="177">
+
+
+                    </telerik:RadRibbonGroup>
+                </telerik:RadRibbonTab>
+
+            </telerik:RadRibbonView.Items>
+        </telerik:RadRibbonView>
+
+        <Canvas 
+ MouseDown="startingDrawing" MouseMove="drawing" MouseUp="stopDrawing"
+            x:Name="mainPaper" IsEnabled="True" Background="White" >
+            <Rectangle Width="208" Height="93" Canvas.Left="178" Canvas.Top="277" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Rectangle.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleY="1" ScaleX="-1"/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Rectangle.RenderTransform>
+            </Rectangle>
+        </Canvas>
+
+    </DockPanel>
+</Window>

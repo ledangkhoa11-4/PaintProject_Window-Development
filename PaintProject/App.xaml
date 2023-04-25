@@ -1,0 +1,13 @@
+﻿<Application x:Class="PaintProject.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
+    StartupUri="MainWindow.xaml">
+    <Application.Resources>
+
+        <Style TargetType="{x:Type TextBlock}">
+            <Setter Property="FontFamily" Value="/Font/#Lato" />
+        </Style>
+    </Application.Resources>
+
+</Application>

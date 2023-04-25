@@ -97,6 +97,7 @@ namespace PaintProject
                     }
                 }
             }
+            shape = _abilities["Line"];
             foreach (var ability in _abilities)
             {
                 //2

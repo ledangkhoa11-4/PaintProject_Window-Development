@@ -6,8 +6,11 @@
                 Title="MainWindow" Height="900" Width="1400"
                 WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded">
+
+
+    
     <DockPanel LastChildFill="True">
-        <telerik:RadRibbonView Panel.ZIndex="99999" DockPanel.Dock="Top" telerik:StyleManager.Theme="Office2019" ApplicationName="Paint Application" TitleBarVisibility="Collapsed">
+        <telerik:RadRibbonView x:Name="ribbon" Panel.ZIndex="99999" DockPanel.Dock="Top" telerik:StyleManager.Theme="Office2019" ApplicationName="Paint Application" TitleBarVisibility="Collapsed">
             <telerik:RadRibbonView.Items>
                 <telerik:RadRibbonTab Header="Home">
                     <telerik:RadRibbonGroup Header="Colors">
@@ -91,7 +94,7 @@
                               Size="Large" 
                               IsChecked ="True"
                               SmallImage="shapes_icon/line_16.png" 
-                              Text="Line" telerik:StyleManager.Theme="Material" />
+                              Text="Line" telerik:StyleManager.Theme="Fluent" />
                             <telerik:RadRibbonRadioButton CollapseToMedium="Never"  
                               CollapseToSmall="WhenGroupIsMedium" 
                               IsAutoSize="True" 
@@ -106,6 +109,13 @@
 
                     </telerik:RadRibbonGroup>
                     <telerik:RadRibbonGroup Header="Tools" Width="177">
+                        <Border>
+                            <telerik:RadRibbonToggleButton x:Name="bucketFill" Checked="buckerFillChange" Unchecked="buckerFillChange"  CornerRadius="6" BorderThickness="1" BorderBrush="#cccccc" IsChecked="False" VerticalAlignment="Top" Width="39" telerik:StyleManager.Theme="Fluent" Margin="-82,11,0,0" Height="18">
+                                <telerik:RadRibbonToggleButton.Content>
+                                    <TextBlock>Fill</TextBlock>
+                                </telerik:RadRibbonToggleButton.Content>
+                            </telerik:RadRibbonToggleButton>
+                        </Border>
 
 
                     </telerik:RadRibbonGroup>
@@ -116,17 +126,8 @@
 
         <Canvas 
  MouseDown="startingDrawing" MouseMove="drawing" MouseUp="stopDrawing"
-            x:Name="mainPaper" IsEnabled="True" Background="White" >
-            <Rectangle Width="208" Height="93" Canvas.Left="178" Canvas.Top="277" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <Rectangle.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleY="1" ScaleX="-1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Rectangle.RenderTransform>
-            </Rectangle>
+            x:Name="mainPaper" IsEnabled="True" Background="White"  >
+
         </Canvas>
 
     </DockPanel>

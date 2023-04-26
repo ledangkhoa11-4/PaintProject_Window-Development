@@ -24,12 +24,21 @@ namespace RectangleAbility
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
 
-        public UIElement Draw(Color color, int thickness)
+        public UIElement Draw(Color color, int thickness,bool isShiftKeyPressed=false)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
             double width = Math.Abs(End.X - Start.X);
-            double height = Math.Abs(End.Y - Start.Y);
+            double height;
+            if (isShiftKeyPressed)
+            {
+                height = width;
+            }
+            else
+            {
+                height = Math.Abs(End.Y - Start.Y);
+            }
+            
 
             var shape = new Rectangle()
             {

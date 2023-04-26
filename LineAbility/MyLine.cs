@@ -24,7 +24,7 @@ namespace LineAbility
             End = p;
         }
 
-        public UIElement Draw(Color color, int thickness)
+        public UIElement Draw(Color color, int thickness,bool isShiftKeyPressed)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;

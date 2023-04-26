@@ -13,6 +13,7 @@ namespace PaintProject
 {
     public partial class MainWindow : Window
     {
+        bool isShiftKeyPressed = false;
         Dictionary<string, IShape> _abilities =new Dictionary<string, IShape>();
 
         private bool isDrawing = false;
@@ -43,7 +44,7 @@ namespace PaintProject
             Point mouseCoor = e.GetPosition(mainPaper);
             endPoint= mouseCoor;
             shape.UpdateEnd(endPoint);
-            UIElement drawShape = shape.Draw(Colors.Red, 1);
+            UIElement drawShape = shape.Draw(Colors.Red, 1,isShiftKeyPressed);
             drawShape.MouseUp += stopDrawing;
             if(lastDraw == null) //first Drawing
             {
@@ -68,6 +69,10 @@ namespace PaintProject
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            this.PreviewKeyDown += Window_PreviewKeyDown;
+
+            
+            this.PreviewKeyUp += Window_PreviewKeyUp;
             var domain = AppDomain.CurrentDomain;
             var folder = domain.BaseDirectory;
 
@@ -90,11 +95,32 @@ namespace PaintProject
                     }
                 }
             }
-            shape = _abilities["Line"];
+            shape = _abilities["Ellipse"];
             foreach (var ability in _abilities)
             {
                 //2
 
+            }
+        }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Check if Shift key is pressed
+            if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+            {
+                isShiftKeyPressed = true;
+                // Handle "Shift" key hold event
+                Console.WriteLine("Shift key is held down.");
+            }
+        }
+
+        private void Window_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            // Check if Shift key is released
+            if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+            {
+                isShiftKeyPressed = false;
+                // Handle "Shift" key release event
+                Console.WriteLine("Shift key is released.");
             }
         }
     }

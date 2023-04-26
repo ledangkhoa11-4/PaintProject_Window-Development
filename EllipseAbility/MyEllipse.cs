@@ -24,12 +24,20 @@ namespace EllipseAbility
             End = p;
         }
 
-        public UIElement Draw(Color color, int thickness)
+        public UIElement Draw(Color color, int thickness, bool isShiftKeyPressed=false)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
             double height = Math.Abs(End.Y - Start.Y);
-            double width = Math.Abs(End.X - Start.X);
+            double width;
+            if(!isShiftKeyPressed)
+            {
+                width= Math.Abs(End.X - Start.X);
+            }
+            else
+            {
+                width = height;
+            }
 
             var shape = new Ellipse()
             {

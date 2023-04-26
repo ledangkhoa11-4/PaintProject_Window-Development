@@ -82,6 +82,8 @@
                               IsAutoSize="True" 
                               LargeImage="shapes_icon/rectangle_32.png" 
                               Size="Large" 
+                              x:Name="rectangle"
+                              Checked="chooseShape"
                               SmallImage="shapes_icon/rectangle_16.png" 
                               Text="Rectangle" telerik:StyleManager.Theme="Material" />
                             <telerik:RadRibbonRadioButton CollapseToMedium="Never"  
@@ -89,7 +91,8 @@
                               IsAutoSize="True" 
                               LargeImage="shapes_icon/line_32.png" 
                               Size="Large" 
-                              IsChecked ="True"
+                              x:Name="line"
+                              Checked="chooseShape"
                               SmallImage="shapes_icon/line_16.png" 
                               Text="Line" telerik:StyleManager.Theme="Material" />
                             <telerik:RadRibbonRadioButton CollapseToMedium="Never"  
@@ -97,6 +100,8 @@
                               IsAutoSize="True" 
                               LargeImage="shapes_icon/ellipse_32.png" 
                               Size="Large" 
+                              x:Name="ellipse"
+                              Checked="chooseShape"
                               SmallImage="shapes_icon/ellipse_16.png" 
                               Text="Ellipse" telerik:StyleManager.Theme="Material" />
                         </telerik:RadRibbonGroup>

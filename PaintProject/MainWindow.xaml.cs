@@ -35,6 +35,7 @@ namespace PaintProject
         private List<IShape> listDrewShapes = new List<IShape>(); //Các hình đã vẽ
 
         private bool isBucketFillMode = false;
+        private bool isSelectionMode = false;
         private Cursor bucketCursor;
         public MainWindow()
         {
@@ -55,16 +56,18 @@ namespace PaintProject
                 Debug.WriteLine(mouseCoor.X);
                 Debug.WriteLine(mouseCoor.Y);
                 ScanLineFill(mouseCoor, color, Colors.Red);
+                return;
             }
-            else
+            
+            if(isSelectionMode)
             {
-                isDrawing = true;
-                
-                startPoint = mouseCoor;
-                shape.UpdateStart(startPoint);
-                Debug.WriteLine("Start");
-                mainPaper.CaptureMouse();
+                return;
             }
+            isDrawing = true;
+            startPoint = mouseCoor;
+            shape.UpdateStart(startPoint);
+            Debug.WriteLine("Start");
+            mainPaper.CaptureMouse();
         }
         private void drawing(object sender, MouseEventArgs e)
         {
@@ -73,7 +76,7 @@ namespace PaintProject
             Point mouseCoor = e.GetPosition(mainPaper);
             endPoint= mouseCoor;
             shape.UpdateEnd(endPoint);
-            UIElement drawShape = shape.Draw(Colors.Red, 1,isShiftKeyPressed);
+            UIElement drawShape = shape.Draw(Colors.Red, 2,isShiftKeyPressed);
             drawShape.MouseUp += stopDrawing;
             if(lastDraw == null) //first Drawing
             {
@@ -150,6 +153,7 @@ namespace PaintProject
             if (bucketFill.IsChecked == true)
             {
                 isBucketFillMode= true;
+                selectElementTg.IsChecked = false;
                 mainPaper.Cursor = bucketCursor;
             }
             else
@@ -158,9 +162,8 @@ namespace PaintProject
                 mainPaper.Cursor = Cursors.Arrow;
 
             }
-
-            }
         }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             // Check if Shift key is pressed
@@ -195,7 +198,7 @@ namespace PaintProject
             return color;
         }
 
-        void ScanLineFill(Point pt, Color targetColor, Color replacementColor)
+        private void ScanLineFill(Point pt, Color targetColor, Color replacementColor)
         {
             targetColor = GetColorAtPoint(getAbsolutePoint(pt));
             if (targetColor == replacementColor)
@@ -208,12 +211,13 @@ namespace PaintProject
             pixels.Push(pt);
             ParallelOptions parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
 
+
             while (pixels.Count != 0 && isBucketFillMode)
             {
 
                 Point temp = pixels.Pop();
                 int y1 = (int)temp.Y;
-                while (y1 >= 0 && GetColorAtPoint(getAbsolutePoint(new Point(temp.X, y1)))  == targetColor)
+                while (y1 >= 0 && GetColorAtPoint(getAbsolutePoint(new Point(temp.X, y1))) == targetColor)
                 {
                     y1--;
                 }
@@ -240,11 +244,11 @@ namespace PaintProject
                         pixels.Push(new Point(temp.X - 2, y1));
                         spanLeft = true;
                     }
-                    else if (spanLeft && temp.X - 2 == 0  && GetColorAtPoint(getAbsolutePoint(new Point(temp.X - 2, y1))) != targetColor)
+                    else if (spanLeft && temp.X - 2 == 0 && GetColorAtPoint(getAbsolutePoint(new Point(temp.X - 2, y1))) != targetColor)
                     {
                         spanLeft = false;
                     }
-                    if (!spanRight && temp.X < mainPaper.ActualWidth - 2 &&  GetColorAtPoint(getAbsolutePoint(new Point(temp.X + 2, y1))) == targetColor)
+                    if (!spanRight && temp.X < mainPaper.ActualWidth - 2 && GetColorAtPoint(getAbsolutePoint(new Point(temp.X + 2, y1))) == targetColor)
                     {
                         pixels.Push(new Point(temp.X + 2, y1));
                         spanRight = true;
@@ -258,6 +262,19 @@ namespace PaintProject
 
             }
             Debug.WriteLine("Finish");
+        }
+
+        private void selectMode(object sender, RoutedEventArgs e)
+        {
+            if (selectElementTg.IsChecked == true)
+            {
+                isSelectionMode = true;
+                bucketFill.IsChecked = false;
+            }
+            else
+            {
+                isSelectionMode = false; 
+            }
         }
     }
 }

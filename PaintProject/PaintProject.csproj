@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Svg.Skia" Version="0.5.18" />
     <PackageReference Include="Telerik.UI.for.Wpf.60.Xaml" Version="2022.1.222" />
   </ItemGroup>
   
@@ -57,6 +56,12 @@
   <ItemGroup>
     <Resource Include="shapes_icon\rectangle_16.png" />
     <Resource Include="shapes_icon\rectangle_32.png" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="cursors\bucket.cur">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

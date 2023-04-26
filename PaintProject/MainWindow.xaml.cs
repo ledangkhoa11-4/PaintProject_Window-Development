@@ -129,7 +129,8 @@ namespace PaintProject
                     }
                 }
             }
-            shape = _abilities["Ellipse"];
+            shape = _abilities["Line"];
+            line.IsChecked= true;
             foreach (var ability in _abilities)
             {
                 //2
@@ -263,17 +264,22 @@ namespace PaintProject
             }
             Debug.WriteLine("Finish");
         }
-
-        private void selectMode(object sender, RoutedEventArgs e)
+        private void chooseShape(object sender, RoutedEventArgs e)
         {
-            if (selectElementTg.IsChecked == true)
+            if (line.IsChecked == true && _abilities.ContainsKey("Line") )
             {
-                isSelectionMode = true;
-                bucketFill.IsChecked = false;
+                shape = _abilities["Line"];
+                return;
             }
-            else
+            if (rectangle.IsChecked == true && _abilities.ContainsKey("Rectangle"))
             {
-                isSelectionMode = false; 
+                shape = _abilities["Rectangle"];
+                return;
+            }
+            if (ellipse.IsChecked == true && _abilities.ContainsKey("Ellipse"))
+            {
+                shape = _abilities["Ellipse"];
+                return;
             }
         }
     }

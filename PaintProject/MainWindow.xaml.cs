@@ -25,7 +25,7 @@ namespace PaintProject
         [DllImport("user32")]
         private static extern int ReleaseDC(int hWnd, int hDC);
 
-        Dictionary<string, IShape> _abilities =new Dictionary<string, IShape>();
+        Dictionary<string, IShape> _abilities = new Dictionary<string, IShape>();
 
         private bool isDrawing = false;
         private Point startPoint;
@@ -47,7 +47,7 @@ namespace PaintProject
         private void startingDrawing(object sender, MouseButtonEventArgs e)
         {
             Point mouseCoor = e.GetPosition(mainPaper);
-            Point mouseInScreen =  PointToScreen(e.GetPosition(this));
+            Point mouseInScreen = PointToScreen(e.GetPosition(this));
             if (isBucketFillMode)
             {
                 Color color = GetColorAtPoint(mouseInScreen);
@@ -58,8 +58,8 @@ namespace PaintProject
                 ScanLineFill(mouseCoor, color, Colors.Red);
                 return;
             }
-            
-            if(isSelectionMode)
+
+            if (isSelectionMode)
             {
                 return;
             }
@@ -74,11 +74,11 @@ namespace PaintProject
             if (!isDrawing)
                 return;
             Point mouseCoor = e.GetPosition(mainPaper);
-            endPoint= mouseCoor;
+            endPoint = mouseCoor;
             shape.UpdateEnd(endPoint);
-            UIElement drawShape = shape.Draw(Colors.Red, 2,isShiftKeyPressed);
+            UIElement drawShape = shape.Draw(Colors.Red, 2, isShiftKeyPressed);
             drawShape.MouseUp += stopDrawing;
-            if(lastDraw == null) //first Drawing
+            if (lastDraw == null) //first Drawing
             {
                 lastDraw = drawShape;
                 mainPaper.Children.Add(drawShape);
@@ -87,12 +87,12 @@ namespace PaintProject
             {
                 mainPaper.Children.Remove(lastDraw);
                 mainPaper.Children.Add(drawShape);
-                lastDraw= drawShape;
+                lastDraw = drawShape;
             }
         }
         private void stopDrawing(object sender, MouseButtonEventArgs e)
         {
-            if(isDrawing)
+            if (isDrawing)
             {
                 isDrawing = false;
                 Debug.WriteLine("Stop");
@@ -105,7 +105,7 @@ namespace PaintProject
         {
             this.PreviewKeyDown += Window_PreviewKeyDown;
 
-            
+
             this.PreviewKeyUp += Window_PreviewKeyUp;
             var domain = AppDomain.CurrentDomain;
             var folder = domain.BaseDirectory;
@@ -130,7 +130,7 @@ namespace PaintProject
                 }
             }
             shape = _abilities["Line"];
-            line.IsChecked= true;
+            line.IsChecked = true;
             foreach (var ability in _abilities)
             {
                 //2
@@ -153,7 +153,7 @@ namespace PaintProject
         {
             if (bucketFill.IsChecked == true)
             {
-                isBucketFillMode= true;
+                isBucketFillMode = true;
                 selectElementTg.IsChecked = false;
                 mainPaper.Cursor = bucketCursor;
             }
@@ -266,7 +266,7 @@ namespace PaintProject
         }
         private void chooseShape(object sender, RoutedEventArgs e)
         {
-            if (line.IsChecked == true && _abilities.ContainsKey("Line") )
+            if (line.IsChecked == true && _abilities.ContainsKey("Line"))
             {
                 shape = _abilities["Line"];
                 return;
@@ -282,4 +282,10 @@ namespace PaintProject
                 return;
             }
         }
+
+        private void selectMode(object sender, RoutedEventArgs e)
+        {
+
+        }
+    }
 }

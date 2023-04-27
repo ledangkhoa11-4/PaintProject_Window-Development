@@ -8,15 +8,18 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Media.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Threading;
 using System.Threading.Tasks;
-using Telerik.Windows.Controls.Charting;
-using Telerik.Windows.Controls.Map;
 using System.Linq;
 using Telerik.Windows.Controls;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.Win32;
+using Path = System.IO.Path;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
+using Newtonsoft.Json;
+using System.Windows.Media.Imaging;
 
 namespace PaintProject
 {
@@ -44,6 +47,16 @@ namespace PaintProject
 
         private bool isBucketFillMode = false;
         private bool isSelectionMode = false;
+     
+        private IShape selectedShape = null;
+        private UIElement sampleUI = null;
+        private UIElement selectedUI = null;
+        private Color selectedShapeColor;
+        private int selectedShapeThickness = 0;
+        private bool isFirstSelected = false;
+        private Point startEditPoint;
+        private Point originalStart;
+        private Point originalEnd;
         private Cursor bucketCursor;
         public MainWindow()
         {
@@ -55,7 +68,7 @@ namespace PaintProject
         private void startingDrawing(object sender, MouseButtonEventArgs e)
         {
             Point mouseCoor = e.GetPosition(mainPaper);
-            Point mouseInScreen = PointToScreen(e.GetPosition(this));
+            Point mouseInScreen =  PointToScreen(e.GetPosition(this));
             if (isBucketFillMode)
             {
                 Color color = GetColorAtPoint(mouseInScreen);
@@ -66,8 +79,8 @@ namespace PaintProject
                 ScanLineFill(mouseCoor, color, selectedColor);
                 return;
             }
-
-            if (isSelectionMode)
+            
+            if (isSelectionMode && selectedShape == null)
             {
                 UIElement clickedElement = null;
                 HitTestResult hitTestResult = VisualTreeHelper.HitTest(mainPaper, mouseCoor);
@@ -96,6 +109,10 @@ namespace PaintProject
                          });
                         if(element != null)
                         {
+                            selectedUI = clickedElement;
+                            selectedShapeColor = color;
+                            selectedShapeThickness= thickness;
+                            DashStyle dashStyle = new DashStyle(new double[] { 4, 2 }, 0);
                             var sampleLine = new System.Windows.Shapes.Line();
                             sampleLine.StrokeThickness = thickness;
                             sampleLine.Stroke = new SolidColorBrush(Colors.White);
@@ -105,13 +122,31 @@ namespace PaintProject
                             sampleLine.Y2 = line.Y2;
                             sampleLine.StrokeDashArray = stroke;
                             mainPaper.Children.Add(sampleLine);
-
+                            selectedShape = element;
+                            sampleUI = sampleLine;
+                            isFirstSelected = true;
+                            originalStart = selectedShape.Start;
+                            originalEnd = selectedShape.End;
+                            
                         }
-
                     }
-                   
                 }
                 return;
+            }
+
+            if (isSelectionMode && selectedShape != null)
+            {
+                if (selectedShape.name == "Line")
+                {
+                    var sampleline = (System.Windows.Shapes.Line)sampleUI;
+                    mainPaper.Cursor = Cursors.Hand;
+                    startEditPoint = mouseCoor;
+                    Debug.WriteLine("Selected");
+                    Debug.WriteLine($"{startEditPoint.X} - {startEditPoint.Y}");
+                    isFirstSelected= false;
+                }
+                return;
+                
             }
             isDrawing = true;
             startPoint = mouseCoor;
@@ -121,24 +156,39 @@ namespace PaintProject
         }
         private void drawing(object sender, MouseEventArgs e)
         {
-            if (!isDrawing)
-                return;
             Point mouseCoor = e.GetPosition(mainPaper);
-            endPoint = mouseCoor;
-            shape.UpdateEnd(endPoint);
-            UIElement drawShape = shape.Draw(selectedColor, thickness,stroke, isShiftKeyPressed);
-            drawShape.MouseUp += stopDrawing;
-            if (lastDraw == null) //first Drawing
+            if (isDrawing)
             {
-                lastDraw = drawShape;
-                mainPaper.Children.Add(drawShape);
+                endPoint = mouseCoor;
+                shape.UpdateEnd(endPoint);
+                UIElement drawShape = shape.Draw(Colors.Red, 2,stroke, isShiftKeyPressed);
+                drawShape.MouseUp += stopDrawing;
+                if (lastDraw == null) //first Drawing
+                {
+                    lastDraw = drawShape;
+                    mainPaper.Children.Add(drawShape);
+                }
+                else
+                {
+                    mainPaper.Children.Remove(lastDraw);
+                    mainPaper.Children.Add(drawShape);
+                    lastDraw = drawShape;
+                }
             }
-            else
+            if(isSelectionMode == true && selectedShape!= null && !isFirstSelected)
             {
-                mainPaper.Children.Remove(lastDraw);
-                mainPaper.Children.Add(drawShape);
-                lastDraw = drawShape;
+                var moveX = mouseCoor.X - startEditPoint.X;
+                var moveY = mouseCoor.Y - startEditPoint.Y;
+
+                selectedShape.UpdateStart(new Point(originalStart.X + moveX, originalStart.Y + moveY));
+                selectedShape.UpdateEnd(new Point(originalEnd.X + moveX, originalEnd.Y + moveY));
+                var newDraw = selectedShape.Draw(selectedShapeColor, selectedShapeThickness);
+                newDraw.MouseUp += stopDrawing;
+                mainPaper.Children.Remove(selectedUI);
+                mainPaper.Children.Add(newDraw);
+                selectedUI = newDraw;
             }
+           
         }
         private void stopDrawing(object sender, MouseButtonEventArgs e)
         {
@@ -149,6 +199,15 @@ namespace PaintProject
                 mainPaper.ReleaseMouseCapture();
                 listDrewShapes.Add((IShape)shape.Clone());
                 lastDraw = null;
+            }
+            Debug.WriteLine("STop");
+            if (isSelectionMode && selectedShape != null && !isFirstSelected) 
+            {
+                Debug.WriteLine("STop");
+                mainPaper.Cursor = Cursors.Arrow;
+                isFirstSelected = true;
+                selectedShape = null;
+                mainPaper.Children.Remove(sampleUI);
             }
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -406,6 +465,55 @@ namespace PaintProject
             {
                 strokeSelect.Text = "Dash Dot Dot";
                 stroke = new DoubleCollection() { 4, 1, 1, 1, 1, 1 };
+            }
+        }
+
+        private void SaveBtn_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.FileName = "paint";
+            saveFileDialog.DefaultExt = ".bin";
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                string filePath = saveFileDialog.FileName;
+
+                WriteObjectListToFile(filePath, listDrewShapes);
+            }
+            ribbon.IsBackstageOpen= false;
+        }
+        void WriteObjectListToFile(string fileName, List<IShape> objectList)
+        {
+            string jsonString = JsonConvert.SerializeObject(listDrewShapes, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
+            File.WriteAllText(fileName, jsonString);
+        }
+
+        // Reading a list of objects from a .json file
+        List<IShape> ReadObjectListFromFile(string fileName)
+        {
+            string jsonString = File.ReadAllText(fileName);
+            List<IShape> objectList = JsonConvert.DeserializeObject<List<IShape>>(jsonString, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
+            return objectList;
+        }
+
+        private void OpenFileBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog= new OpenFileDialog();
+            openFileDialog.Filter = "Files|*.bin";
+            if(openFileDialog.ShowDialog() == true)
+            {
+                listDrewShapes= ReadObjectListFromFile(openFileDialog.FileName);
+                foreach(var shape in listDrewShapes)
+                {
+                    UIElement drawshape= shape.Draw(Colors.Red, 2, isShiftKeyPressed);
+                    mainPaper.Children.Add(drawshape);
+                }
+                
             }
         }
     }

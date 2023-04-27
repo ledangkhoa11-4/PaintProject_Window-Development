@@ -3,14 +3,14 @@
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
                 xmlns:svg="http://schemas.squidex.io/schemas/svg"
-                Title="MainWindow" Height="900" Width="1400"
+                Title="MainWindow" Height="800" Width="1400"
                 WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded">
 
 
 
     <DockPanel LastChildFill="True">
-        <telerik:RadRibbonView x:Name="ribbon" Panel.ZIndex="99999" DockPanel.Dock="Top" telerik:StyleManager.Theme="Office2019" ApplicationName="Paint Application" TitleBarVisibility="Collapsed">
+        <telerik:RadRibbonView x:Name="ribbon" ApplicationButtonContent="File" Panel.ZIndex="99999" DockPanel.Dock="Top" telerik:StyleManager.Theme="Office2019" ApplicationName="Paint Application" TitleBarVisibility="Collapsed">
             <telerik:RadRibbonView.Items>
                 <telerik:RadRibbonTab Header="Home">
                     <telerik:RadRibbonGroup Header="Colors">
@@ -166,8 +166,28 @@
                 </telerik:RadRibbonTab>
 
             </telerik:RadRibbonView.Items>
+            <telerik:RadRibbonView.Backstage>
+                <telerik:RadRibbonBackstage x:Name="myRadRibbonBackstageControl" CloseButtonVisibility="Collapsed">
+                    <telerik:RadRibbonBackstageItem Header="Exit"  FontSize="24" CloseOnClick="True" IsSelectable="False" Icon="images/back.png"/>
+                    <telerik:RadRibbonBackstageItem Name="SaveBtn"  Header="Save" FontSize="24" Click="SaveBtn_Click" Icon="images/save.png" Foreground="White" IsSelectable="False" CloseOnClick="False">
+                        
+                    </telerik:RadRibbonBackstageItem>
+                    <telerik:RadRibbonBackstageItem Header="Export"  FontSize="24" Icon="images/export.png" >
+                        <StackPanel>
+                            <TextBlock Margin="10,10,0,10">Export as</TextBlock>
+                            <telerik:RadButton Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">PNG</telerik:RadButton>
+                            <telerik:RadButton Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">PNG</telerik:RadButton>
+                            <telerik:RadButton Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">PNG</telerik:RadButton>
+                           
+                        </StackPanel>
+                    </telerik:RadRibbonBackstageItem>
+                    <telerik:RadRibbonBackstageItem Name="OpenFileBtn" Header="Open" Click="OpenFileBtn_Click"  FontSize="24" IsSelectable="False" CloseOnClick="False" />
+                    <telerik:RadRibbonBackstageItem Header="New"  FontSize="24" Icon="images/new.png" IsSelectable="False" CloseOnClick="False"/>
+                   
+                </telerik:RadRibbonBackstage>
+            </telerik:RadRibbonView.Backstage>
         </telerik:RadRibbonView>
-
+        
         <Canvas 
  MouseDown="startingDrawing" MouseMove="drawing" MouseUp="stopDrawing"
             x:Name="mainPaper" IsEnabled="True" Background="White"  >

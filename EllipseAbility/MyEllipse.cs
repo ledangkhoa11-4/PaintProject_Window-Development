@@ -15,6 +15,8 @@ namespace EllipseAbility
         public string name { get => "Ellipse"; }
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
+        public DoubleCollection StrokeDashArray { get; set; } = new DoubleCollection();
+
         public void UpdateStart(Point p)
         {
             Start = p;

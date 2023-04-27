@@ -12,6 +12,7 @@ namespace RectangleAbility
         public Point End { get; set; }
 
         public string name { get => "Rectangle"; }
+        public DoubleCollection StrokeDashArray { get; set; } = new DoubleCollection();
 
         public void UpdateStart(Point p)
         {
@@ -38,7 +39,7 @@ namespace RectangleAbility
             {
                 height = Math.Abs(End.Y - Start.Y);
             }
-            
+
 
             var shape = new Rectangle()
             {

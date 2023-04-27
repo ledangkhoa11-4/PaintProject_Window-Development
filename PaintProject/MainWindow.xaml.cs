@@ -19,6 +19,7 @@ using Path = System.IO.Path;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Json;
 using Newtonsoft.Json;
+using System.Windows.Media.Imaging;
 
 namespace PaintProject
 {

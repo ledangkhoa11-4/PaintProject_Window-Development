@@ -8,15 +8,17 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Media.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Threading;
 using System.Threading.Tasks;
-using Telerik.Windows.Controls.Charting;
-using Telerik.Windows.Controls.Map;
 using System.Linq;
 using Telerik.Windows.Controls;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.Win32;
+using Path = System.IO.Path;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace PaintProject
 {
@@ -62,7 +64,7 @@ namespace PaintProject
         private void startingDrawing(object sender, MouseButtonEventArgs e)
         {
             Point mouseCoor = e.GetPosition(mainPaper);
-            Point mouseInScreen = PointToScreen(e.GetPosition(this));
+            Point mouseInScreen =  PointToScreen(e.GetPosition(this));
             if (isBucketFillMode)
             {
                 Color color = GetColorAtPoint(mouseInScreen);
@@ -418,6 +420,55 @@ namespace PaintProject
                 isSelectionMode = false;
                 mainPaper.Cursor = Cursors.Arrow;
 
+            }
+        }
+
+        private void SaveBtn_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.FileName = "paint";
+            saveFileDialog.DefaultExt = ".bin";
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                string filePath = saveFileDialog.FileName;
+
+                WriteObjectListToFile(filePath, listDrewShapes);
+            }
+            ribbon.IsBackstageOpen= false;
+        }
+        void WriteObjectListToFile(string fileName, List<IShape> objectList)
+        {
+            string jsonString = JsonConvert.SerializeObject(listDrewShapes, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
+            File.WriteAllText(fileName, jsonString);
+        }
+
+        // Reading a list of objects from a .json file
+        List<IShape> ReadObjectListFromFile(string fileName)
+        {
+            string jsonString = File.ReadAllText(fileName);
+            List<IShape> objectList = JsonConvert.DeserializeObject<List<IShape>>(jsonString, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
+            return objectList;
+        }
+
+        private void OpenFileBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog= new OpenFileDialog();
+            openFileDialog.Filter = "Files|*.bin";
+            if(openFileDialog.ShowDialog() == true)
+            {
+                listDrewShapes= ReadObjectListFromFile(openFileDialog.FileName);
+                foreach(var shape in listDrewShapes)
+                {
+                    UIElement drawshape= shape.Draw(Colors.Red, 2, isShiftKeyPressed);
+                    mainPaper.Children.Add(drawshape);
+                }
+                
             }
         }
     }

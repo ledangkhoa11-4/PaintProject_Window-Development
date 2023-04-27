@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Telerik.UI.for.Wpf.60.Xaml" Version="2022.1.222" />
   </ItemGroup>
   
@@ -44,6 +45,10 @@
     <Content Include="Fonts\Lato-Thin.ttf" />
     <Content Include="Fonts\Lato-ThinItalic.ttf" />
     <Content Include="Fonts\OFL.txt" />
+    <Resource Include="images\export.png" />
+    <Resource Include="images\back.png" />
+    <Resource Include="images\save.png" />
+    <Resource Include="images\new.png" />
   </ItemGroup>
   
   <ItemGroup>

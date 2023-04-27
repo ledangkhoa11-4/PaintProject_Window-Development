@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using Telerik.Windows.Controls.Charting;
 using Telerik.Windows.Controls.Map;
 using System.Linq;
+using Telerik.Windows.Documents.Spreadsheet.Expressions.Functions;
+using Telerik.Windows.Controls;
 
 namespace PaintProject
 {
@@ -43,7 +45,8 @@ namespace PaintProject
         public MainWindow()
         {
             InitializeComponent();
-            var folderInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "cursors");
+        //C: \Users\Admin\Desktop\CODE\Nam_3\HK2\Window Program\Project2\PaintProject\Images\diskette.png
+        var folderInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "cursors");
             bucketCursor = new Cursor($"{folderInfo}\\bucket.cur");
         }
 
@@ -344,6 +347,11 @@ namespace PaintProject
                 mainPaper.Cursor = Cursors.Arrow;
 
             }
+        }
+
+        private void SaveBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ribbon.IsBackstageOpen= false;
         }
     }
 }

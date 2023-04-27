@@ -12,6 +12,9 @@ using System.Windows.Media.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Threading;
 using System.Threading.Tasks;
+using Telerik.Windows.Controls.Charting;
+using Telerik.Windows.Controls.Map;
+using System.Linq;
 
 namespace PaintProject
 {
@@ -61,6 +64,50 @@ namespace PaintProject
 
             if (isSelectionMode)
             {
+                UIElement clickedElement = null;
+                HitTestResult hitTestResult = VisualTreeHelper.HitTest(mainPaper, mouseCoor);
+                if (hitTestResult != null && hitTestResult.VisualHit != null)
+                {
+                    clickedElement = hitTestResult.VisualHit as UIElement;
+                }
+
+                // Check if an element was actually clicked
+                if (clickedElement != null)
+                {
+                    int thickness = 0;
+                    Color color;
+                    if(clickedElement is System.Windows.Shapes.Line)
+                    {
+                        Debug.WriteLine("Line");
+                        var line = (System.Windows.Shapes.Line)clickedElement;
+                        thickness = (int)line.StrokeThickness;
+                        var brush = line.Stroke as SolidColorBrush;
+                        color = brush.Color;
+
+                        var element = listDrewShapes.FirstOrDefault(shape =>
+                        {
+                            if (shape.name == "Line" && shape.Start == new Point(line.X1, line.Y1) && shape.End == new Point(line.X2, line.Y2))
+                                return true;
+                            return false;
+                         });
+                        if(element != null)
+                        {
+                            DashStyle dashStyle = new DashStyle(new double[] { 4, 2 }, 0);
+                            var sampleLine = new System.Windows.Shapes.Line();
+                            sampleLine.StrokeThickness = 1;
+                            sampleLine.Stroke = new SolidColorBrush(Colors.White);
+                            sampleLine.X1 = line.X1;
+                            sampleLine.Y1 = line.Y1;
+                            sampleLine.X2 = line.X2;
+                            sampleLine.Y2 = line.Y2;
+                            sampleLine.StrokeDashArray = dashStyle.Dashes;
+                            mainPaper.Children.Add(sampleLine);
+
+                        }
+
+                    }
+                   
+                }
                 return;
             }
             isDrawing = true;
@@ -285,7 +332,18 @@ namespace PaintProject
 
         private void selectMode(object sender, RoutedEventArgs e)
         {
+            if (selectElementTg.IsChecked == true)
+            {
+                isSelectionMode = true;
+                bucketFill.IsChecked = false;
+               
+            }
+            else
+            {
+                isSelectionMode = false;
+                mainPaper.Cursor = Cursors.Arrow;
 
+            }
         }
     }
 }

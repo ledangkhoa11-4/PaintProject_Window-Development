@@ -78,9 +78,9 @@
                             </telerik:RadRibbonDropDownButton.DropDownContent>
                         </telerik:RadRibbonDropDownButton>
                     </telerik:RadRibbonGroup>
-                    <telerik:RadRibbonGroup Header="Shapes">
+                    <telerik:RadRibbonGroup x:Name="shapes" Header="Shapes">
                         <telerik:RadRibbonGroup >
-                            <telerik:RadRibbonRadioButton CollapseToMedium="Never"  
+                            <!--<telerik:RadRibbonRadioButton CollapseToMedium="Never"  
                               CollapseToSmall="WhenGroupIsMedium" 
                               IsAutoSize="True" 
                               LargeImage="shapes_icon/rectangle_32.png" 
@@ -106,7 +106,7 @@
                               x:Name="ellipse"
                               Checked="chooseShape"
                               SmallImage="shapes_icon/ellipse_16.png" 
-                              Text="Ellipse" telerik:StyleManager.Theme="Material" />
+                              Text="Ellipse" telerik:StyleManager.Theme="Material" />-->
                         </telerik:RadRibbonGroup>
                     </telerik:RadRibbonGroup>
                     <telerik:RadRibbonGroup Header="Stroke type" Width="128">

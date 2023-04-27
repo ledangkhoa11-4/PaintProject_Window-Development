@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using Telerik.Windows.Controls.Charting;
 using Telerik.Windows.Controls.Map;
 using System.Linq;
+using Telerik.Windows.Controls;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PaintProject
 {
@@ -176,12 +178,42 @@ namespace PaintProject
                     }
                 }
             }
-            shape = _abilities["Line"];
-            line.IsChecked = true;
+            //shape = _abilities["Line"];
+            //line.IsChecked = true;
+            bool ischecked = true;
             foreach (var ability in _abilities)
             {
-                //2
+                var button = new RadRibbonRadioButton()
+                {
+                    CollapseToMedium = CollapseThreshold.Never,
+                    CollapseToSmall = CollapseThreshold.WhenGroupIsMedium,
+                    IsAutoSize = true,
+                    IsChecked= ischecked,
+                    //LargeImage = new BitmapImage(new Uri(@"shapes_icon/{ability.Key.ToLower()}_32.png", UriKind.RelativeOrAbsolute)),
+                    Size = Telerik.Windows.Controls.RibbonView.ButtonSize.Large,
+                    Name = ability.Key.ToLower(),
+                    //SmallImage = new BitmapImage(new Uri(@"shapes_icon/{ability.Key.ToLower()}_16.png", UriKind.RelativeOrAbsolute)),
+                    Text = ability.Key
+                };
+                if(ischecked) ischecked= false;
+                StyleManager.SetTheme(button, new MaterialTheme());
+
+                var image32 = new BitmapImage();
+                image32.BeginInit();
+                image32.UriSource = new Uri(folder + $"shapes_icon/{ability.Key.ToLower()}_32.png", UriKind.Absolute);
+                image32.EndInit();
+                button.LargeImage = image32;
+
+                var image16 = new BitmapImage();
+                image16.BeginInit();
+                image16.UriSource = new Uri(folder + $"shapes_icon/{ability.Key.ToLower()}_16.png", UriKind.Absolute);
+                image16.EndInit();
+                button.SmallImage = image16;
+
+                button.Click += chooseShape;
+                shapes.Items.Add(button);
             }
+            shape = _abilities.FirstOrDefault().Value;
         }
         private Point getAbsolutePoint(Point pointInApp)
         {
@@ -313,21 +345,9 @@ namespace PaintProject
         }
         private void chooseShape(object sender, RoutedEventArgs e)
         {
-            if (line.IsChecked == true && _abilities.ContainsKey("Line"))
-            {
-                shape = _abilities["Line"];
-                return;
-            }
-            if (rectangle.IsChecked == true && _abilities.ContainsKey("Rectangle"))
-            {
-                shape = _abilities["Rectangle"];
-                return;
-            }
-            if (ellipse.IsChecked == true && _abilities.ContainsKey("Ellipse"))
-            {
-                shape = _abilities["Ellipse"];
-                return;
-            }
+            var button = (RadRibbonRadioButton)sender;
+            string name = (string)button.Text;
+            shape = _abilities[name];
         }
 
         private void selectMode(object sender, RoutedEventArgs e)

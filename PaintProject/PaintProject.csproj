@@ -47,15 +47,27 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Resource Include="shapes_icon\ellipse_16.png" />
-    <Resource Include="shapes_icon\ellipse_32.png" />
-    <Resource Include="shapes_icon\line_16.png" />
-    <Resource Include="shapes_icon\line_32.png" />
+    <Content Include="shapes_icon\ellipse_16.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shapes_icon\ellipse_32.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shapes_icon\line_16.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shapes_icon\line_32.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   
   <ItemGroup>
-    <Resource Include="shapes_icon\rectangle_16.png" />
-    <Resource Include="shapes_icon\rectangle_32.png" />
+    <Content Include="shapes_icon\rectangle_16.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shapes_icon\rectangle_32.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   
   <ItemGroup>

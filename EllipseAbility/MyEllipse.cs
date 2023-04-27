@@ -15,6 +15,8 @@ namespace EllipseAbility
         public string name { get => "Ellipse"; }
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
+        public DoubleCollection StrokeDashArray { get; set; } = new DoubleCollection();
+
         public void UpdateStart(Point p)
         {
             Start = p;
@@ -24,10 +26,12 @@ namespace EllipseAbility
             End = p;
         }
 
-        public UIElement Draw(Color color, int thickness, bool isShiftKeyPressed=false)
+        public UIElement Draw(Color color, int thickness, bool isShiftKeyPressed = false, DoubleCollection dash = null)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
+            if(dash != null) { StrokeDashArray = dash; }
+            else { dash = StrokeDashArray; }
             double height = Math.Abs(End.Y - Start.Y);
             double width;
             if(!isShiftKeyPressed)
@@ -44,6 +48,7 @@ namespace EllipseAbility
                 Width = width,
                 Height = height,
                 Stroke = new SolidColorBrush(color),
+                StrokeDashArray = dash,
                 StrokeThickness = thickness
             };
 

@@ -12,6 +12,7 @@ namespace RectangleAbility
         public Point End { get; set; }
 
         public string name { get => "Rectangle"; }
+        public DoubleCollection StrokeDashArray { get; set; } = new DoubleCollection();
 
         public void UpdateStart(Point p)
         {
@@ -24,10 +25,12 @@ namespace RectangleAbility
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
 
-        public UIElement Draw(Color color, int thickness,bool isShiftKeyPressed=false)
+        public UIElement Draw(Color color, int thickness,bool isShiftKeyPressed=false, DoubleCollection dash = null)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
+            if (dash != null) { StrokeDashArray = dash; }
+            else { dash = StrokeDashArray; }
             double width = Math.Abs(End.X - Start.X);
             double height;
             if (isShiftKeyPressed)
@@ -38,13 +41,14 @@ namespace RectangleAbility
             {
                 height = Math.Abs(End.Y - Start.Y);
             }
-            
+
 
             var shape = new Rectangle()
             {
                 Width = width,
                 Height = height,
                 Stroke = new SolidColorBrush(color),
+                StrokeDashArray = dash,
                 StrokeThickness = thickness
             };
             Canvas.SetLeft(shape, Start.X);

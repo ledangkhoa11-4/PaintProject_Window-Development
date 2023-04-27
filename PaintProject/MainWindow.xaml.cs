@@ -41,6 +41,16 @@ namespace PaintProject
 
         private bool isBucketFillMode = false;
         private bool isSelectionMode = false;
+     
+        private IShape selectedShape = null;
+        private UIElement sampleUI = null;
+        private UIElement selectedUI = null;
+        private Color selectedShapeColor;
+        private int selectedShapeThickness = 0;
+        private bool isFirstSelected = false;
+        private Point startEditPoint;
+        private Point originalStart;
+        private Point originalEnd;
         private Cursor bucketCursor;
         public MainWindow()
         {
@@ -63,8 +73,8 @@ namespace PaintProject
                 ScanLineFill(mouseCoor, color, Colors.Red);
                 return;
             }
-
-            if (isSelectionMode)
+            
+            if (isSelectionMode && selectedShape == null)
             {
                 UIElement clickedElement = null;
                 HitTestResult hitTestResult = VisualTreeHelper.HitTest(mainPaper, mouseCoor);
@@ -94,9 +104,12 @@ namespace PaintProject
                          });
                         if(element != null)
                         {
+                            selectedUI = clickedElement;
+                            selectedShapeColor = color;
+                            selectedShapeThickness= thickness;
                             DashStyle dashStyle = new DashStyle(new double[] { 4, 2 }, 0);
                             var sampleLine = new System.Windows.Shapes.Line();
-                            sampleLine.StrokeThickness = 1;
+                            sampleLine.StrokeThickness = thickness;
                             sampleLine.Stroke = new SolidColorBrush(Colors.White);
                             sampleLine.X1 = line.X1;
                             sampleLine.Y1 = line.Y1;
@@ -104,13 +117,31 @@ namespace PaintProject
                             sampleLine.Y2 = line.Y2;
                             sampleLine.StrokeDashArray = dashStyle.Dashes;
                             mainPaper.Children.Add(sampleLine);
-
+                            selectedShape = element;
+                            sampleUI = sampleLine;
+                            isFirstSelected = true;
+                            originalStart = selectedShape.Start;
+                            originalEnd = selectedShape.End;
+                            
                         }
-
                     }
-                   
                 }
                 return;
+            }
+
+            if (isSelectionMode && selectedShape != null)
+            {
+                if (selectedShape.name == "Line")
+                {
+                    var sampleline = (System.Windows.Shapes.Line)sampleUI;
+                    mainPaper.Cursor = Cursors.Hand;
+                    startEditPoint = mouseCoor;
+                    Debug.WriteLine("Selected");
+                    Debug.WriteLine($"{startEditPoint.X} - {startEditPoint.Y}");
+                    isFirstSelected= false;
+                }
+                return;
+                
             }
             isDrawing = true;
             startPoint = mouseCoor;
@@ -120,24 +151,39 @@ namespace PaintProject
         }
         private void drawing(object sender, MouseEventArgs e)
         {
-            if (!isDrawing)
-                return;
             Point mouseCoor = e.GetPosition(mainPaper);
-            endPoint = mouseCoor;
-            shape.UpdateEnd(endPoint);
-            UIElement drawShape = shape.Draw(Colors.Red, 2, isShiftKeyPressed);
-            drawShape.MouseUp += stopDrawing;
-            if (lastDraw == null) //first Drawing
+            if (isDrawing)
             {
-                lastDraw = drawShape;
-                mainPaper.Children.Add(drawShape);
+                endPoint = mouseCoor;
+                shape.UpdateEnd(endPoint);
+                UIElement drawShape = shape.Draw(Colors.Red, 2, isShiftKeyPressed);
+                drawShape.MouseUp += stopDrawing;
+                if (lastDraw == null) //first Drawing
+                {
+                    lastDraw = drawShape;
+                    mainPaper.Children.Add(drawShape);
+                }
+                else
+                {
+                    mainPaper.Children.Remove(lastDraw);
+                    mainPaper.Children.Add(drawShape);
+                    lastDraw = drawShape;
+                }
             }
-            else
+            if(isSelectionMode == true && selectedShape!= null && !isFirstSelected)
             {
-                mainPaper.Children.Remove(lastDraw);
-                mainPaper.Children.Add(drawShape);
-                lastDraw = drawShape;
+                var moveX = mouseCoor.X - startEditPoint.X;
+                var moveY = mouseCoor.Y - startEditPoint.Y;
+
+                selectedShape.UpdateStart(new Point(originalStart.X + moveX, originalStart.Y + moveY));
+                selectedShape.UpdateEnd(new Point(originalEnd.X + moveX, originalEnd.Y + moveY));
+                var newDraw = selectedShape.Draw(selectedShapeColor, selectedShapeThickness);
+                newDraw.MouseUp += stopDrawing;
+                mainPaper.Children.Remove(selectedUI);
+                mainPaper.Children.Add(newDraw);
+                selectedUI = newDraw;
             }
+           
         }
         private void stopDrawing(object sender, MouseButtonEventArgs e)
         {
@@ -148,6 +194,15 @@ namespace PaintProject
                 mainPaper.ReleaseMouseCapture();
                 listDrewShapes.Add((IShape)shape.Clone());
                 lastDraw = null;
+            }
+            Debug.WriteLine("STop");
+            if (isSelectionMode && selectedShape != null && !isFirstSelected) 
+            {
+                Debug.WriteLine("STop");
+                mainPaper.Cursor = Cursors.Arrow;
+                isFirstSelected = true;
+                selectedShape = null;
+                mainPaper.Children.Remove(sampleUI);
             }
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)

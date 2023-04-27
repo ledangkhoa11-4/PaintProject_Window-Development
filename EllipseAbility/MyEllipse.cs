@@ -24,7 +24,7 @@ namespace EllipseAbility
             End = p;
         }
 
-        public UIElement Draw(Color color, int thickness, bool isShiftKeyPressed=false)
+        public UIElement Draw(Color color, int thickness,DoubleCollection stroke, bool isShiftKeyPressed=false)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
@@ -44,6 +44,7 @@ namespace EllipseAbility
                 Width = width,
                 Height = height,
                 Stroke = new SolidColorBrush(color),
+                StrokeDashArray= stroke,
                 StrokeThickness = thickness
             };
 

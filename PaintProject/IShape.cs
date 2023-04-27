@@ -11,6 +11,6 @@ namespace PaintProject
         public Point End { get; set; }
         void UpdateStart(Point p);
         void UpdateEnd(Point p);
-        UIElement Draw(System.Windows.Media.Color color, int thickness,bool isShiftKeyPressed=false);
+        UIElement Draw(System.Windows.Media.Color color, int thickness,DoubleCollection stroke,bool isShiftKeyPressed=false);
     }
 }

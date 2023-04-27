@@ -14,7 +14,7 @@
             <telerik:RadRibbonView.Items>
                 <telerik:RadRibbonTab Header="Home">
                     <telerik:RadRibbonGroup Header="Colors">
-                        <telerik:RadColorPicker x:Name="colorPicker" Width="146" telerik:StyleManager.Theme="VisualStudio2019" Background="#FFF1F1F1">
+                        <telerik:RadColorPicker x:Name="colorPicker" Width="146" telerik:StyleManager.Theme="VisualStudio2019" Background="#FFF1F1F1" SelectedColorChanged="ColorPickerChanged">
                             <telerik:RadColorPicker.ContentTemplate>
                                 <DataTemplate>
                                     <Path StrokeThickness="2" Height="28" Stretch="Fill" Width="91" HorizontalAlignment="Left" VerticalAlignment="Center" Canvas.Left="10">
@@ -38,9 +38,9 @@
                         </telerik:RadColorPicker>
                     </telerik:RadRibbonGroup>
                     <telerik:RadRibbonGroup Header="Weight">
-                        <telerik:RadRibbonDropDownButton   Text="1px" VerticalAlignment="Center" telerik:StyleManager.Theme="Material" Width="100">
+                        <telerik:RadRibbonDropDownButton x:Name="weightInfo" VerticalAlignment="Center" telerik:StyleManager.Theme="Material" Width="100">
                             <telerik:RadRibbonDropDownButton.DropDownContent>
-                                <ListBox Width="150">
+                                <ListBox x:Name="listWeight" Width="150" SelectionMode="Single" SelectionChanged="ChangeWeight">
                                     <ListBoxItem Height="30">
                                         <ListBoxItem.Content>
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -110,7 +110,41 @@
                         </telerik:RadRibbonGroup>
                     </telerik:RadRibbonGroup>
                     <telerik:RadRibbonGroup Header="Stroke type" Width="128">
+                        <telerik:RadRibbonDropDownButton x:Name="strokeSelect" FontSize="10" VerticalAlignment="Center" telerik:StyleManager.Theme="Material" Width="100">
+                            <telerik:RadRibbonDropDownButton.DropDownContent>
+                                <ListBox x:Name="listStroke" Width="150" SelectionMode="Single" SelectionChanged="ChangeStroke" HorizontalAlignment="Center">
+                                    <ListBoxItem Height="30" HorizontalAlignment="Center">
+                                        <ListBoxItem.Content>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <Line VerticalAlignment="Center"  X1="10" Y1="0" X2="90" Y2="0" Stroke="Black" StrokeThickness="2"/>
+                                            </StackPanel>
+                                        </ListBoxItem.Content>
+                                    </ListBoxItem>
+                                    <ListBoxItem Height="30" HorizontalAlignment="Center">
+                                        <ListBoxItem.Content>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <Line VerticalAlignment="Center"  X1="10" Y1="0" X2="90" Y2="0" Stroke="Black" StrokeThickness="2"  StrokeDashArray="1"/>
+                                            </StackPanel>
+                                        </ListBoxItem.Content>
+                                    </ListBoxItem>
+                                    <ListBoxItem Height="30" HorizontalAlignment="Center">
+                                        <ListBoxItem.Content>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <Line VerticalAlignment="Center"  X1="10" Y1="0" X2="90" Y2="0" Stroke="Black" StrokeThickness="2" StrokeDashArray="4 1"/>
+                                            </StackPanel>
+                                        </ListBoxItem.Content>
+                                    </ListBoxItem>
+                                    <ListBoxItem Height="30" HorizontalAlignment="Center">
+                                        <ListBoxItem.Content>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <Line VerticalAlignment="Center"  X1="10" Y1="0" X2="90" Y2="0" Stroke="Black" StrokeThickness="2" StrokeDashArray="4 1 1 1 1 1"/>
+                                            </StackPanel>
+                                        </ListBoxItem.Content>
+                                    </ListBoxItem>
 
+                                </ListBox>
+                            </telerik:RadRibbonDropDownButton.DropDownContent>
+                        </telerik:RadRibbonDropDownButton>
 
                     </telerik:RadRibbonGroup>
                     <telerik:RadRibbonGroup Header="Tools" Width="177">

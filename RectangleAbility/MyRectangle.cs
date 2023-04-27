@@ -24,7 +24,7 @@ namespace RectangleAbility
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
 
-        public UIElement Draw(Color color, int thickness,bool isShiftKeyPressed=false)
+        public UIElement Draw(Color color, int thickness,DoubleCollection stroke, bool isShiftKeyPressed=false)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
@@ -45,6 +45,7 @@ namespace RectangleAbility
                 Width = width,
                 Height = height,
                 Stroke = new SolidColorBrush(color),
+                StrokeDashArray = stroke,
                 StrokeThickness = thickness
             };
             Canvas.SetLeft(shape, Start.X);

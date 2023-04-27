@@ -24,7 +24,7 @@ namespace LineAbility
             End = p;
         }
 
-        public UIElement Draw(Color color, int thickness,bool isShiftKeyPressed)
+        public UIElement Draw(Color color, int thickness,DoubleCollection stroke,bool isShiftKeyPressed)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
@@ -35,6 +35,7 @@ namespace LineAbility
                 X2 = End.X,
                 Y2 = End.Y,
                 Stroke = new SolidColorBrush(color),
+                StrokeDashArray = stroke,
                 StrokeThickness = thickness
             };
         }

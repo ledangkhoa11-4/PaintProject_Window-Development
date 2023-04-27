@@ -38,6 +38,9 @@ namespace PaintProject
         private IShape shape = null;  //Hình đang vẽ
         private UIElement lastDraw = null; //Hình preview cuối cùng (Không vẽ lại tất cả - Improve số 4)
         private List<IShape> listDrewShapes = new List<IShape>(); //Các hình đã vẽ
+        private Color selectedColor = Colors.Black;
+        private int thickness = 1;
+        private DoubleCollection stroke;
 
         private bool isBucketFillMode = false;
         private bool isSelectionMode = false;
@@ -60,7 +63,7 @@ namespace PaintProject
                 Debug.WriteLine(hex);
                 Debug.WriteLine(mouseCoor.X);
                 Debug.WriteLine(mouseCoor.Y);
-                ScanLineFill(mouseCoor, color, Colors.Red);
+                ScanLineFill(mouseCoor, color, selectedColor);
                 return;
             }
 
@@ -76,13 +79,12 @@ namespace PaintProject
                 // Check if an element was actually clicked
                 if (clickedElement != null)
                 {
-                    int thickness = 0;
                     Color color;
                     if(clickedElement is System.Windows.Shapes.Line)
                     {
                         Debug.WriteLine("Line");
                         var line = (System.Windows.Shapes.Line)clickedElement;
-                        thickness = (int)line.StrokeThickness;
+                        line.StrokeThickness = thickness;
                         var brush = line.Stroke as SolidColorBrush;
                         color = brush.Color;
 
@@ -94,15 +96,14 @@ namespace PaintProject
                          });
                         if(element != null)
                         {
-                            DashStyle dashStyle = new DashStyle(new double[] { 4, 2 }, 0);
                             var sampleLine = new System.Windows.Shapes.Line();
-                            sampleLine.StrokeThickness = 1;
+                            sampleLine.StrokeThickness = thickness;
                             sampleLine.Stroke = new SolidColorBrush(Colors.White);
                             sampleLine.X1 = line.X1;
                             sampleLine.Y1 = line.Y1;
                             sampleLine.X2 = line.X2;
                             sampleLine.Y2 = line.Y2;
-                            sampleLine.StrokeDashArray = dashStyle.Dashes;
+                            sampleLine.StrokeDashArray = stroke;
                             mainPaper.Children.Add(sampleLine);
 
                         }
@@ -125,7 +126,7 @@ namespace PaintProject
             Point mouseCoor = e.GetPosition(mainPaper);
             endPoint = mouseCoor;
             shape.UpdateEnd(endPoint);
-            UIElement drawShape = shape.Draw(Colors.Red, 2, isShiftKeyPressed);
+            UIElement drawShape = shape.Draw(selectedColor, thickness,stroke, isShiftKeyPressed);
             drawShape.MouseUp += stopDrawing;
             if (lastDraw == null) //first Drawing
             {
@@ -178,8 +179,6 @@ namespace PaintProject
                     }
                 }
             }
-            //shape = _abilities["Line"];
-            //line.IsChecked = true;
             bool ischecked = true;
             foreach (var ability in _abilities)
             {
@@ -214,6 +213,8 @@ namespace PaintProject
                 shapes.Items.Add(button);
             }
             shape = _abilities.FirstOrDefault().Value;
+            weightInfo.Text = thickness.ToString() + "px";
+            strokeSelect.Text = "Line";
         }
         private Point getAbsolutePoint(Point pointInApp)
         {
@@ -363,6 +364,48 @@ namespace PaintProject
                 isSelectionMode = false;
                 mainPaper.Cursor = Cursors.Arrow;
 
+            }
+        }
+
+        private void ColorPickerChanged(object sender, EventArgs e)
+        {
+            RadColorPicker colorPicker = sender as RadColorPicker;
+            selectedColor = colorPicker.SelectedColor;
+
+        }
+
+        private void ChangeWeight(object sender, SelectionChangedEventArgs e)
+        {
+            int i = listWeight.SelectedIndex;
+            if (i == 0) thickness = 1;
+            else if (i == 1) thickness = 3;
+            else if(i == 2) thickness = 5;
+            else if(i == 3) thickness = 8;
+            weightInfo.Text = thickness.ToString() + "px";
+        }
+
+        private void ChangeStroke(object sender, SelectionChangedEventArgs e)
+        {
+            int i = listStroke.SelectedIndex;
+            if (i == 0)
+            {
+                strokeSelect.Text = "Line";
+                stroke = new DoubleCollection() { };
+            }
+            else if (i == 1)
+            {
+                strokeSelect.Text = "Dot";
+                stroke = new DoubleCollection() { 1 };
+            }
+            else if (i == 2)
+            {
+                strokeSelect.Text = "Dash";
+                stroke = new DoubleCollection() { 4, 1 };
+            }
+            else if (i == 3)
+            {
+                strokeSelect.Text = "Dash Dot Dot";
+                stroke = new DoubleCollection() { 4, 1, 1, 1, 1, 1 };
             }
         }
     }

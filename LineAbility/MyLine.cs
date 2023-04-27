@@ -29,6 +29,8 @@ namespace LineAbility
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
+            if (stroke != null) { StrokeDashArray = stroke; }
+            else { stroke = StrokeDashArray; }
             return new Line()
             {
                 X1 = Start.X,

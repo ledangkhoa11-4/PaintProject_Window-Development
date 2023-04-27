@@ -29,6 +29,8 @@ namespace RectangleAbility
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
+            if (stroke != null) { StrokeDashArray = stroke; }
+            else { stroke = StrokeDashArray; }
             double width = Math.Abs(End.X - Start.X);
             double height;
             if (isShiftKeyPressed)

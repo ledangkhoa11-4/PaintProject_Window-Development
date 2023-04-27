@@ -14,6 +14,6 @@ namespace PaintProject
         public DoubleCollection StrokeDashArray { get; set; }
         void UpdateStart(Point p);
         void UpdateEnd(Point p);
-        UIElement Draw(System.Windows.Media.Color color, int thickness,DoubleCollection stroke,bool isShiftKeyPressed=false);
+        UIElement Draw(System.Windows.Media.Color color, int thickness,DoubleCollection stroke = null,bool isShiftKeyPressed=false);
     }
 }

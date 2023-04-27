@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows;
 using PaintProject;
+using System.Security.Policy;
 
 namespace EllipseAbility
 {
@@ -26,10 +27,12 @@ namespace EllipseAbility
             End = p;
         }
 
-        public UIElement Draw(Color color, int thickness,DoubleCollection stroke, bool isShiftKeyPressed=false)
+        public UIElement Draw(Color color, int thickness,DoubleCollection stroke = null, bool isShiftKeyPressed=false)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
+            if (stroke != null) { StrokeDashArray = stroke; }
+            else { stroke = StrokeDashArray; }
             double height = Math.Abs(End.Y - Start.Y);
             double width;
             if(!isShiftKeyPressed)

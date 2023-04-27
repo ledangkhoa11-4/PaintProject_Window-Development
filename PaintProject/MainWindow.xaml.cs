@@ -161,7 +161,7 @@ namespace PaintProject
             {
                 endPoint = mouseCoor;
                 shape.UpdateEnd(endPoint);
-                UIElement drawShape = shape.Draw(Colors.Red, 2,stroke, isShiftKeyPressed);
+                UIElement drawShape = shape.Draw(selectedColor, thickness,stroke, isShiftKeyPressed);
                 drawShape.MouseUp += stopDrawing;
                 if (lastDraw == null) //first Drawing
                 {
@@ -510,7 +510,7 @@ namespace PaintProject
                 listDrewShapes= ReadObjectListFromFile(openFileDialog.FileName);
                 foreach(var shape in listDrewShapes)
                 {
-                    UIElement drawshape= shape.Draw(Colors.Red, 2, isShiftKeyPressed);
+                    UIElement drawshape= shape.Draw(Colors.Red, 2, stroke, isShiftKeyPressed);
                     mainPaper.Children.Add(drawshape);
                 }
                 

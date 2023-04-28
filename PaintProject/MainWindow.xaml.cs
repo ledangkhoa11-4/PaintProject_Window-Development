@@ -516,5 +516,55 @@ namespace PaintProject
                 
             }
         }
+        private void ZoomIn_Click(object sender, RoutedEventArgs e)
+        {
+            double newScale = scaleTransform.ScaleX * 1.1;
+            if (newScale <= 8.0)
+            {
+                scaleTransform.ScaleX = newScale;
+                scaleTransform.ScaleY = newScale;
+                ZoomSlider.Value = newScale;
+                ZoomPercentage.Text = string.Format("{0}%", (int)(newScale * 100));
+            }
+        }
+
+        private void ZoomOut_Click(object sender, RoutedEventArgs e)
+        {
+            double newScale = scaleTransform.ScaleX / 1.1;
+            if (newScale >= 0.5)
+            {
+                scaleTransform.ScaleX = newScale;
+                scaleTransform.ScaleY = newScale;
+                ZoomSlider.Value = newScale;
+                ZoomPercentage.Text = string.Format("{0}%", (int)(newScale * 100));
+            }
+        }
+
+        private void mainPaper_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Delta > 0)
+                {
+                    ZoomIn_Click(null, null);
+                }
+                else if (e.Delta < 0)
+                {
+                    ZoomOut_Click(null, null);
+                }
+                e.Handled = true;
+            }
+        }
+        private void ZoomSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (scaleTransform != null)
+            {
+                double newScale = ZoomSlider.Value;
+                scaleTransform.ScaleX = newScale;
+                scaleTransform.ScaleY = newScale;
+                ZoomPercentage.Text = string.Format("{0}%", (int)(newScale * 100));
+            }
+        }
+
     }
 }

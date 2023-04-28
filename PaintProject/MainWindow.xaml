@@ -175,13 +175,13 @@
                     <telerik:RadRibbonBackstageItem Header="Export"  FontSize="24" Icon="images/export.png" >
                         <StackPanel>
                             <TextBlock Margin="10,10,0,10">Export as</TextBlock>
-                            <telerik:RadButton Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">PNG</telerik:RadButton>
-                            <telerik:RadButton Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">PNG</telerik:RadButton>
-                            <telerik:RadButton Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">PNG</telerik:RadButton>
+                            <telerik:RadButton Click="ExportPngFile" Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">.PNG File</telerik:RadButton>
+                            <telerik:RadButton Click="ExportJpgFile" Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">.JPG File</telerik:RadButton>
+                            <telerik:RadButton Click="ExportBmpFile" Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">.BMP File</telerik:RadButton>
                            
                         </StackPanel>
                     </telerik:RadRibbonBackstageItem>
-                    <telerik:RadRibbonBackstageItem Name="OpenFileBtn" Header="Open" Click="OpenFileBtn_Click"  FontSize="24" IsSelectable="False" CloseOnClick="False" />
+                    <telerik:RadRibbonBackstageItem Name="OpenFileBtn" Header="Open" Click="OpenFileBtn_Click" Icon="images/open.png"  FontSize="24" IsSelectable="False" CloseOnClick="False" />
                     <telerik:RadRibbonBackstageItem Header="New"  FontSize="24" Icon="images/new.png" IsSelectable="False" CloseOnClick="False"/>
                    
                 </telerik:RadRibbonBackstage>

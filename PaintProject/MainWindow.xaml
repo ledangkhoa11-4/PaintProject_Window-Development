@@ -168,6 +168,9 @@
 
 
                     </telerik:RadRibbonGroup>
+                    <telerik:RadRibbonGroup Header="Insert" Width="204">
+                        <Button Content="⛵ Image" Click="ImportImageButton_Click" Margin="-78,9,34,19" />
+                    </telerik:RadRibbonGroup>
                 </telerik:RadRibbonTab>
 
             </telerik:RadRibbonView.Items>
@@ -200,6 +203,7 @@
                 <Canvas.LayoutTransform>
                     <ScaleTransform x:Name="scaleTransform" ScaleX="1" ScaleY="1"/>
                 </Canvas.LayoutTransform>
+                
             </Canvas>
         </ScrollViewer>
 

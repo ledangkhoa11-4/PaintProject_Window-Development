@@ -443,22 +443,7 @@ namespace PaintProject
             weightInfo.Text = thickness.ToString() + "px";
         }
 
-        private void ColorPickerChanged(object sender, EventArgs e)
-        {
-            RadColorPicker colorPicker = sender as RadColorPicker;
-            selectedColor = colorPicker.SelectedColor;
-
-        }
-
-        private void ChangeWeight(object sender, SelectionChangedEventArgs e)
-        {
-            int i = listWeight.SelectedIndex;
-            if (i == 0) thickness = 1;
-            else if (i == 1) thickness = 3;
-            else if (i == 2) thickness = 5;
-            else if (i == 3) thickness = 8;
-            weightInfo.Text = thickness.ToString() + "px";
-        }
+       
 
         private void ChangeStroke(object sender, SelectionChangedEventArgs e)
         {
@@ -596,7 +581,7 @@ namespace PaintProject
         private void ZoomOut_Click(object sender, RoutedEventArgs e)
         {
             double newScale = scaleTransform.ScaleX / 1.1;
-            if (newScale >= 0.5)
+            if (newScale >= 0.125)
             {
                 scaleTransform.ScaleX = newScale;
                 scaleTransform.ScaleY = newScale;
@@ -628,6 +613,31 @@ namespace PaintProject
                 scaleTransform.ScaleX = newScale;
                 scaleTransform.ScaleY = newScale;
                 ZoomPercentage.Text = string.Format("{0}%", (int)(newScale * 100));
+            }
+        }
+        private System.Windows.Controls.Image selectedImage;
+        private Point initialMousePos;
+        private Point initialImagePos;
+
+        private void ImportImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Create a OpenFileDialog to allow the user to select an image file
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog();
+            openFileDialog.Filter = "Image files (*.png;*.jpeg;*.jpg;*.bmp)|*.png;*.jpeg;*.jpg;*.bmp|All files (*.*)|*.*";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                // Create a new BitmapImage from the selected file
+                var bitmapImage = new BitmapImage(new Uri(openFileDialog.FileName));
+
+                // Create a new Image control and set its Source and Stretch properties
+                var image = new System.Windows.Controls.Image() { Source = bitmapImage, Stretch = Stretch.Fill };
+              
+                // Create a new Viewbox and set its Width, Height, and Child properties
+                var viewbox = new Viewbox() { Width = 200, Height = 200, Child = image };
+
+                // Add the Viewbox to the canvas
+                mainPaper.Children.Add(viewbox);
             }
         }
 

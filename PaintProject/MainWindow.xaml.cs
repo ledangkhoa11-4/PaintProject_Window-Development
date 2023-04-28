@@ -20,6 +20,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Json;
 using Newtonsoft.Json;
 using System.Windows.Media.Imaging;
+using Telerik.Windows.Controls.Map;
 
 namespace PaintProject
 {
@@ -57,6 +58,8 @@ namespace PaintProject
         private Point originalStart;
         private Point originalEnd;
         private Cursor bucketCursor;
+        private bool isFileSave=true;
+        private string curFilePath = "";
         private Cursor moveCursor;
         public MainWindow()
         {
@@ -216,6 +219,7 @@ namespace PaintProject
                 Debug.WriteLine("Stop");
                 mainPaper.ReleaseMouseCapture();
                 listDrewShapes.Add((IShape)shape.Clone());
+                isFileSave= false;
                 lastDraw = null;
             }
             Debug.WriteLine("STop");
@@ -494,18 +498,26 @@ namespace PaintProject
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.FileName = "paint";
-            saveFileDialog.DefaultExt = ".bin";
-            saveFileDialog.Filter = "Files|*.bin;*.dat;*.ccmd";
+           
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.FileName = "paint";
+                saveFileDialog.DefaultExt = ".bin";
+                saveFileDialog.Filter = "Files|*.bin;*.dat;*.dkpq";
 
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                string filePath = saveFileDialog.FileName;
-
-                WriteObjectListToFile(filePath, listDrewShapes);
-            }
-            ribbon.IsBackstageOpen = false;
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    curFilePath = saveFileDialog.FileName;
+                    
+                    WriteObjectListToFile(curFilePath, listDrewShapes);
+                    isFileSave = true;
+                }
+                else
+                {
+                    isFileSave = false;
+                }
+                ribbon.IsBackstageOpen = false;
+                
+            
         }
         void WriteObjectListToFile(string fileName, List<IShape> objectList)
         {
@@ -529,24 +541,64 @@ namespace PaintProject
 
         private void OpenFileBtn_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Files|*.bin;*.dat;*.ccmd";
-            if (openFileDialog.ShowDialog() == true)
+            ribbon.IsBackstageOpen = false;
+            if (!isFileSave && listDrewShapes.Count>0)
             {
-                try
-                {
-                    listDrewShapes = ReadObjectListFromFile(openFileDialog.FileName);
-                    foreach (var shape in listDrewShapes)
-                    {
-                        UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false);
-                        mainPaper.Children.Add(drawshape);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+                string messageBoxText = "Do you want to save changes?";
+                string caption = "Save file";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+                MessageBoxResult result;
 
+                result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.Yes);
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveBtn_Click(sender, e);
+                }
+                else
+                {
+                    isFileSave = true;
+                    OpenFileBtn_Click(sender: this, e: e);
+                    
+                }
+            }
+            else
+            {
+                var openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Files|*.bin;*.dat;*.dkpq;*.jpg;*.png;*.bmp";
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string ext = Path.GetExtension(openFileDialog.FileName).ToLower().Replace(".","");
+                    if (ext == "jpg" || ext == "png" || ext == "bmp")
+                    {
+                        BitmapImage bitmap = new BitmapImage(new Uri(openFileDialog.FileName));
+                        double width = bitmap.Width;
+                        double height = bitmap.Height;
+                        mainPaper.Width = width;
+                        mainPaper.Height = height;
+                        ImageBrush imageBrush = new ImageBrush();
+                        imageBrush.ImageSource = bitmap;
+                        mainPaper.Background = imageBrush;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            mainPaper.Children.Clear();
+                            listDrewShapes = ReadObjectListFromFile(openFileDialog.FileName);
+                            foreach (var shape in listDrewShapes)
+                            {
+                                UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false);
+                                mainPaper.Children.Add(drawshape);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                        }
+                    }
+
+                }
             }
         }
         private void ExportImageFile(BitmapEncoder encoder)

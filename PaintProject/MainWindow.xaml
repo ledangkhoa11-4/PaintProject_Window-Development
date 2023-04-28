@@ -186,7 +186,7 @@
                             <telerik:RadButton Click="ExportPngFile" Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">.PNG File</telerik:RadButton>
                             <telerik:RadButton Click="ExportJpgFile" Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">.JPG File</telerik:RadButton>
                             <telerik:RadButton Click="ExportBmpFile" Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">.BMP File</telerik:RadButton>
-                           
+
                         </StackPanel>
                     </telerik:RadRibbonBackstageItem>
                     <telerik:RadRibbonBackstageItem Name="OpenFileBtn" Header="Open" Click="OpenFileBtn_Click" Icon="images/open.png"  FontSize="24" IsSelectable="False" CloseOnClick="False" />
@@ -203,7 +203,7 @@
                 <Canvas.LayoutTransform>
                     <ScaleTransform x:Name="scaleTransform" ScaleX="1" ScaleY="1"/>
                 </Canvas.LayoutTransform>
-                
+
             </Canvas>
         </ScrollViewer>
 

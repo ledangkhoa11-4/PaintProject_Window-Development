@@ -41,6 +41,16 @@ namespace PaintProject
 
         private bool isBucketFillMode = false;
         private bool isSelectionMode = false;
+
+        private IShape selectedShape = null;
+        private UIElement sampleUI = null;
+        private UIElement selectedUI = null;
+        private Color selectedShapeColor;
+        private int selectedShapeThickness = 0;
+        private bool isFirstSelected = false;
+        private Point startEditPoint;
+        private Point originalStart;
+        private Point originalEnd;
         private Cursor bucketCursor;
         public MainWindow()
         {
@@ -53,7 +63,7 @@ namespace PaintProject
         private void startingDrawing(object sender, MouseButtonEventArgs e)
         {
             Point mouseCoor = e.GetPosition(mainPaper);
-            Point mouseInScreen =  PointToScreen(e.GetPosition(this));
+            Point mouseInScreen = PointToScreen(e.GetPosition(this));
             if (isBucketFillMode)
             {
                 Color color = GetColorAtPoint(mouseInScreen);
@@ -64,8 +74,8 @@ namespace PaintProject
                 ScanLineFill(mouseCoor, color, Colors.Red);
                 return;
             }
-            
-            if(isSelectionMode)
+
+            if (isSelectionMode && selectedShape == null)
             {
                 UIElement clickedElement = null;
                 HitTestResult hitTestResult = VisualTreeHelper.HitTest(mainPaper, mouseCoor);
@@ -79,7 +89,7 @@ namespace PaintProject
                 {
                     int thickness = 0;
                     Color color;
-                    if(clickedElement is System.Windows.Shapes.Line)
+                    if (clickedElement is System.Windows.Shapes.Line)
                     {
                         Debug.WriteLine("Line");
                         var line = (System.Windows.Shapes.Line)clickedElement;
@@ -92,9 +102,12 @@ namespace PaintProject
                             if (shape.name == "Line" && shape.Start == new Point(line.X1, line.Y1) && shape.End == new Point(line.X2, line.Y2))
                                 return true;
                             return false;
-                         });
-                        if(element != null)
+                        });
+                        if (element != null)
                         {
+                            selectedUI = clickedElement;
+                            selectedShapeColor = color;
+                            selectedShapeThickness = thickness;
                             DashStyle dashStyle = new DashStyle(new double[] { 4, 2 }, 0);
                             var sampleLine = new System.Windows.Shapes.Line();
                             sampleLine.StrokeThickness = 1;
@@ -105,13 +118,32 @@ namespace PaintProject
                             sampleLine.Y2 = line.Y2;
                             sampleLine.StrokeDashArray = dashStyle.Dashes;
                             mainPaper.Children.Add(sampleLine);
+                            selectedShape = element;
+                            sampleUI = sampleLine;
+                            isFirstSelected = true;
+                            originalStart = selectedShape.Start;
+                            originalEnd = selectedShape.End;
 
                         }
 
                     }
-                   
                 }
                 return;
+            }
+
+            if (isSelectionMode && selectedShape != null)
+            {
+                if (selectedShape.name == "Line")
+                {
+                    var sampleline = (System.Windows.Shapes.Line)sampleUI;
+                    mainPaper.Cursor = Cursors.Hand;
+                    startEditPoint = mouseCoor;
+                    Debug.WriteLine("Selected");
+                    Debug.WriteLine($"{startEditPoint.X} - {startEditPoint.Y}");
+                    isFirstSelected = false;
+                }
+                return;
+
             }
             isDrawing = true;
             startPoint = mouseCoor;
@@ -124,21 +156,38 @@ namespace PaintProject
             if (!isDrawing)
                 return;
             Point mouseCoor = e.GetPosition(mainPaper);
-            endPoint= mouseCoor;
-            shape.UpdateEnd(endPoint);
-            UIElement drawShape = shape.Draw(Colors.Red, 2,isShiftKeyPressed);
-            drawShape.MouseUp += stopDrawing;
-            if(lastDraw == null) //first Drawing
+            if (isDrawing)
             {
-                lastDraw = drawShape;
-                mainPaper.Children.Add(drawShape);
+                endPoint = mouseCoor;
+                shape.UpdateEnd(endPoint);
+                UIElement drawShape = shape.Draw(selectedColor, thickness, stroke, isShiftKeyPressed);
+                drawShape.MouseUp += stopDrawing;
+                if (lastDraw == null) //first Drawing
+                {
+                    lastDraw = drawShape;
+                    mainPaper.Children.Add(drawShape);
+                }
+                else
+                {
+                    mainPaper.Children.Remove(lastDraw);
+                    mainPaper.Children.Add(drawShape);
+                    lastDraw = drawShape;
+                }
             }
-            else
+            if (isSelectionMode == true && selectedShape != null && !isFirstSelected)
             {
-                mainPaper.Children.Remove(lastDraw);
-                mainPaper.Children.Add(drawShape);
-                lastDraw= drawShape;
+                var moveX = mouseCoor.X - startEditPoint.X;
+                var moveY = mouseCoor.Y - startEditPoint.Y;
+
+                selectedShape.UpdateStart(new Point(originalStart.X + moveX, originalStart.Y + moveY));
+                selectedShape.UpdateEnd(new Point(originalEnd.X + moveX, originalEnd.Y + moveY));
+                var newDraw = selectedShape.Draw(selectedShapeColor, selectedShapeThickness, stroke, isShiftKeyPressed);
+                newDraw.MouseUp += stopDrawing;
+                mainPaper.Children.Remove(selectedUI);
+                mainPaper.Children.Add(newDraw);
+                selectedUI = newDraw;
             }
+
         }
         private void stopDrawing(object sender, MouseButtonEventArgs e)
         {
@@ -149,6 +198,15 @@ namespace PaintProject
                 mainPaper.ReleaseMouseCapture();
                 listDrewShapes.Add((IShape)shape.Clone());
                 lastDraw = null;
+            }
+            Debug.WriteLine("STop");
+            if (isSelectionMode && selectedShape != null && !isFirstSelected)
+            {
+                Debug.WriteLine("STop");
+                mainPaper.Cursor = Cursors.Arrow;
+                isFirstSelected = true;
+                selectedShape = null;
+                mainPaper.Children.Remove(sampleUI);
             }
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -183,7 +241,35 @@ namespace PaintProject
             line.IsChecked= true;
             foreach (var ability in _abilities)
             {
-                //2
+                var button = new RadRibbonRadioButton()
+                {
+                    CollapseToMedium = CollapseThreshold.Never,
+                    CollapseToSmall = CollapseThreshold.WhenGroupIsMedium,
+                    IsAutoSize = true,
+                    IsChecked = ischecked,
+                    //LargeImage = new BitmapImage(new Uri(@"shapes_icon/{ability.Key.ToLower()}_32.png", UriKind.RelativeOrAbsolute)),
+                    Size = Telerik.Windows.Controls.RibbonView.ButtonSize.Large,
+                    Name = ability.Key.ToLower(),
+                    //SmallImage = new BitmapImage(new Uri(@"shapes_icon/{ability.Key.ToLower()}_16.png", UriKind.RelativeOrAbsolute)),
+                    Text = ability.Key
+                };
+                if (ischecked) ischecked = false;
+                StyleManager.SetTheme(button, new MaterialTheme());
+
+                var image32 = new BitmapImage();
+                image32.BeginInit();
+                image32.UriSource = new Uri(folder + $"shapes_icon/{ability.Key.ToLower()}_32.png", UriKind.Absolute);
+                image32.EndInit();
+                button.LargeImage = image32;
+
+                var image16 = new BitmapImage();
+                image16.BeginInit();
+                image16.UriSource = new Uri(folder + $"shapes_icon/{ability.Key.ToLower()}_16.png", UriKind.Absolute);
+                image16.EndInit();
+                button.SmallImage = image16;
+
+                button.Click += chooseShape;
+                shapes.Items.Add(button);
             }
         }
         private Point getAbsolutePoint(Point pointInApp)
@@ -339,7 +425,7 @@ namespace PaintProject
             {
                 isSelectionMode = true;
                 bucketFill.IsChecked = false;
-               
+
             }
             else
             {
@@ -349,18 +435,62 @@ namespace PaintProject
             }
         }
 
+        private void ColorPickerChanged(object sender, EventArgs e)
+        {
+            RadColorPicker colorPicker = sender as RadColorPicker;
+            selectedColor = colorPicker.SelectedColor;
+
+        }
+
+        private void ChangeWeight(object sender, SelectionChangedEventArgs e)
+        {
+            int i = listWeight.SelectedIndex;
+            if (i == 0) thickness = 1;
+            else if (i == 1) thickness = 3;
+            else if (i == 2) thickness = 5;
+            else if (i == 3) thickness = 8;
+            weightInfo.Text = thickness.ToString() + "px";
+        }
+
+        private void ChangeStroke(object sender, SelectionChangedEventArgs e)
+        {
+            int i = listStroke.SelectedIndex;
+            if (i == 0)
+            {
+                strokeSelect.Text = "Line";
+                stroke = new DoubleCollection() { };
+            }
+            else if (i == 1)
+            {
+                strokeSelect.Text = "Dot";
+                stroke = new DoubleCollection() { 1 };
+            }
+            else if (i == 2)
+            {
+                strokeSelect.Text = "Dash";
+                stroke = new DoubleCollection() { 4, 1 };
+            }
+            else if (i == 3)
+            {
+                strokeSelect.Text = "Dash Dot Dot";
+                stroke = new DoubleCollection() { 4, 1, 1, 1, 1, 1 };
+            }
+        }
+
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.FileName = "paint";
             saveFileDialog.DefaultExt = ".bin";
+            saveFileDialog.Filter = "Files|*.bin;*.dat;*.ccmd";
+
             if (saveFileDialog.ShowDialog() == true)
             {
                 string filePath = saveFileDialog.FileName;
 
                 WriteObjectListToFile(filePath, listDrewShapes);
             }
-            ribbon.IsBackstageOpen= false;
+            ribbon.IsBackstageOpen = false;
         }
         void WriteObjectListToFile(string fileName, List<IShape> objectList)
         {
@@ -384,18 +514,64 @@ namespace PaintProject
 
         private void OpenFileBtn_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog= new OpenFileDialog();
-            openFileDialog.Filter = "Files|*.bin";
-            if(openFileDialog.ShowDialog() == true)
+            var openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Files|*.bin;*.dat;*.ccmd";
+            if (openFileDialog.ShowDialog() == true)
             {
-                listDrewShapes= ReadObjectListFromFile(openFileDialog.FileName);
-                foreach(var shape in listDrewShapes)
+                try
                 {
-                    UIElement drawshape= shape.Draw(Colors.Red, 2, isShiftKeyPressed);
-                    mainPaper.Children.Add(drawshape);
+                    listDrewShapes = ReadObjectListFromFile(openFileDialog.FileName);
+                    foreach (var shape in listDrewShapes)
+                    {
+                        UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false);
+                        mainPaper.Children.Add(drawshape);
+                    }
                 }
-                
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+
             }
+        }
+        private void ExportImageFile(BitmapEncoder encoder)
+        {
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)mainPaper.ActualWidth, (int)mainPaper.ActualHeight, 96d, 96d, PixelFormats.Default);
+            rtb.Render(mainPaper);
+            encoder.Frames.Add(BitmapFrame.Create(rtb));
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.DefaultExt = encoder.GetType().ToString().ToLower().Replace("bitmapencoder", "");
+            saveFileDialog.FileName = "paint";
+            saveFileDialog.OverwritePrompt = true;
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    using (FileStream fs = File.Create(saveFileDialog.FileName))
+                    {
+                        encoder.Save(fs);
+                    }
+                }catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+        private void ExportPngFile(object sender, RoutedEventArgs e)
+        {
+            ExportImageFile(new PngBitmapEncoder());
+
+
+        }
+
+        private void ExportJpgFile(object sender, RoutedEventArgs e)
+        {
+            ExportImageFile(new JpegBitmapEncoder());
+        }
+
+        private void ExportBmpFile(object sender, RoutedEventArgs e)
+        {
+            ExportImageFile(new BmpBitmapEncoder());
         }
     }
 }

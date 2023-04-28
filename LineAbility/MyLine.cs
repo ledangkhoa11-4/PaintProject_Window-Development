@@ -14,6 +14,7 @@ namespace LineAbility
 
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
+        public DoubleCollection? StrokeDashArray { get ; set; }
 
         public void UpdateStart(Point p)
         {

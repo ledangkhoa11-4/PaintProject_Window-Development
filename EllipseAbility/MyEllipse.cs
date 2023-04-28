@@ -17,7 +17,7 @@ namespace EllipseAbility
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
         public DoubleCollection StrokeDashArray { get; set; } = new DoubleCollection();
-
+        public int rotateAngle { get; set; } = 0;
         public void UpdateStart(Point p)
         {
             Start = p;
@@ -27,7 +27,7 @@ namespace EllipseAbility
             End = p;
         }
 
-        public UIElement Draw(Color color, int thickness,DoubleCollection stroke = null, bool isShiftKeyPressed=false)
+        public UIElement Draw(Color color, int thickness,DoubleCollection stroke = null, bool isShiftKeyPressed=false, int angle = 0)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
@@ -42,6 +42,7 @@ namespace EllipseAbility
             else
             {
                 width = height;
+                End = new Point(Start.X + width, Start.Y + width);
             }
 
             var shape = new Ellipse()
@@ -55,6 +56,7 @@ namespace EllipseAbility
 
             Canvas.SetLeft(shape, Start.X);
             Canvas.SetTop(shape, Start.Y);
+            TransformGroup transformGroup = new TransformGroup();
             ScaleTransform scaleTransform = new ScaleTransform();
 
             if (Start.X <= End.X && Start.Y <= End.Y)
@@ -77,8 +79,16 @@ namespace EllipseAbility
                 scaleTransform.ScaleY = -1;
                 scaleTransform.ScaleX = -1;
             }
-            shape.RenderTransform = scaleTransform;
+
+            Point center = new Point(Start.X + shape.Width / 2, Start.Y + shape.Height / 2);
+            rotateAngle = angle;
+            RotateTransform rotateTransform = new RotateTransform(rotateAngle, center.X, center.Y);    
+            transformGroup.Children.Add(rotateTransform);
+            transformGroup.Children.Add(scaleTransform);
+            shape.RenderTransform = transformGroup;
+
             return shape;
+
         }
 
         public object Clone()

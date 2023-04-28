@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using PaintProject;
@@ -14,6 +15,7 @@ namespace LineAbility
 
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
+        public int rotateAngle { get; set; } = 0;
         public DoubleCollection StrokeDashArray { get ; set; } = new DoubleCollection();
 
         public void UpdateStart(Point p)
@@ -25,13 +27,13 @@ namespace LineAbility
             End = p;
         }
 
-        public UIElement Draw(Color color, int thickness,DoubleCollection stroke,bool isShiftKeyPressed)
+        public UIElement Draw(Color color, int thickness,DoubleCollection stroke = null,bool isShiftKeyPressed = false, int angle = 0)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
             if (stroke != null) { StrokeDashArray = stroke; }
             else { stroke = StrokeDashArray; }
-            return new Line()
+            var UI = new Line()
             {
                 X1 = Start.X,
                 Y1 = Start.Y,
@@ -41,6 +43,11 @@ namespace LineAbility
                 StrokeDashArray = stroke,
                 StrokeThickness = thickness
             };
+
+            Point center = new Point((Start.X + End.X) / 2, (End.Y + End.Y) / 2);
+            rotateAngle = angle;
+            RotateTransform rotateTransform = new RotateTransform(rotateAngle, center.X, center.Y);
+            return UI;
         }
 
         public object Clone()

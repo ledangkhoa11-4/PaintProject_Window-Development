@@ -12,8 +12,9 @@ namespace PaintProject
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
         public DoubleCollection StrokeDashArray { get; set; }
+        public int rotateAngle { get; set; }
         void UpdateStart(Point p);
         void UpdateEnd(Point p);
-        UIElement Draw(System.Windows.Media.Color color, int thickness,DoubleCollection stroke = null,bool isShiftKeyPressed=false);
+        UIElement Draw(System.Windows.Media.Color color, int thickness,DoubleCollection stroke = null,bool isShiftKeyPressed=false, int angle = 0);
     }
 }

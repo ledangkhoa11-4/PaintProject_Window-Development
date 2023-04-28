@@ -4,6 +4,8 @@ using System.Windows.Media;
 using System.Windows;
 using PaintProject;
 using System.Windows.Shapes;
+
+
 namespace RectangleAbility
 {
     public class MyRectangle:IShape
@@ -13,7 +15,7 @@ namespace RectangleAbility
 
         public string name { get => "Rectangle"; }
         public DoubleCollection StrokeDashArray { get; set; } = new DoubleCollection();
-
+        public int rotateAngle { get; set; } = 0;
         public void UpdateStart(Point p)
         {
             Start = p;
@@ -25,7 +27,7 @@ namespace RectangleAbility
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
 
-        public UIElement Draw(Color color, int thickness,DoubleCollection stroke, bool isShiftKeyPressed=false)
+        public UIElement Draw(Color color, int thickness,DoubleCollection stroke, bool isShiftKeyPressed=false, int angle = 0)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
@@ -36,6 +38,7 @@ namespace RectangleAbility
             if (isShiftKeyPressed)
             {
                 height = width;
+                End = new Point(Start.X + width, Start.Y + width);
             }
             else
             {
@@ -53,6 +56,7 @@ namespace RectangleAbility
             };
             Canvas.SetLeft(shape, Start.X);
             Canvas.SetTop(shape, Start.Y);
+            TransformGroup transformGroup = new TransformGroup();
             ScaleTransform scaleTransform = new ScaleTransform();
 
             if (Start.X <= End.X && Start.Y <= End.Y)
@@ -76,6 +80,14 @@ namespace RectangleAbility
                 scaleTransform.ScaleX = -1;
             }
             shape.RenderTransform = scaleTransform;
+           
+            Point center = new Point( Start.X + shape.Width / 2, Start.Y + shape.Height/2);
+            rotateAngle = angle;
+            RotateTransform rotateTransform = new RotateTransform(rotateAngle, center.X, center.Y);
+
+            transformGroup.Children.Add(rotateTransform);
+            transformGroup.Children.Add(scaleTransform);
+            shape.RenderTransform = transformGroup;
             return shape;
         }
 

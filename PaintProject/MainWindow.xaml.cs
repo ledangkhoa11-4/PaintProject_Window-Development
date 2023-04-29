@@ -58,6 +58,8 @@ namespace PaintProject
         private Point originalStart;
         private Point originalEnd;
         private Cursor bucketCursor;
+        private bool isFileSave=true;
+        private string curFilePath = "";
         private Cursor moveCursor;
         public MainWindow()
         {

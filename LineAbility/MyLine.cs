@@ -44,9 +44,10 @@ namespace LineAbility
                 StrokeThickness = thickness
             };
 
-            Point center = new Point((Start.X + End.X) / 2, (End.Y + End.Y) / 2);
+            Point center = new Point((UI.X1 + UI.X2) / 2, (UI.Y1 + UI.Y2) / 2);
             rotateAngle = angle;
             RotateTransform rotateTransform = new RotateTransform(rotateAngle, center.X, center.Y);
+            UI.RenderTransform = rotateTransform;
             return UI;
         }
 

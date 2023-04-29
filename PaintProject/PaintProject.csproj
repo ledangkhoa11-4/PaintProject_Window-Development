@@ -45,6 +45,12 @@
     <Content Include="Fonts\Lato-Thin.ttf" />
     <Content Include="Fonts\Lato-ThinItalic.ttf" />
     <Content Include="Fonts\OFL.txt" />
+    <Content Include="images\redo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\undo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Resource Include="images\open.png" />
     <Resource Include="images\export.png" />
     <Resource Include="images\back.png" />

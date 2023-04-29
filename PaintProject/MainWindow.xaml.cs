@@ -41,6 +41,7 @@ namespace PaintProject
         private Point endPoint;
         private IShape shape = null;  //Hình đang vẽ
         private UIElement lastDraw = null; //Hình preview cuối cùng (Không vẽ lại tất cả - Improve số 4)
+        private UIElement lastShape = null;
         private List<IShape> listDrewShapes = new List<IShape>(); //Các hình đã vẽ
         private Color selectedColor = Colors.Black;
         private int thickness = 1;
@@ -194,6 +195,7 @@ namespace PaintProject
                     mainPaper.Children.Remove(lastDraw);
                     mainPaper.Children.Add(drawShape);
                     lastDraw = drawShape;
+                    lastShape = drawShape;
                 }
             }
             if (isSelectionMode == true && selectedShape != null && !isFirstSelected)
@@ -234,6 +236,12 @@ namespace PaintProject
                 selectedShape = null;
                 mainPaper.Children.Remove(sampleUI);
             }
+            if(UndoButton.IsEnabled == false)
+            {
+                UndoButton.IsEnabled = true;
+                Border border = UndoButton.FindChildByType<Border>();
+                border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
+            }
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -241,6 +249,7 @@ namespace PaintProject
 
 
             this.PreviewKeyUp += Window_PreviewKeyUp;
+            this.KeyDown += MainWindow_KeyDown;
             var domain = AppDomain.CurrentDomain;
             var folder = domain.BaseDirectory;
 
@@ -299,6 +308,10 @@ namespace PaintProject
             shape = _abilities.FirstOrDefault().Value;
             weightInfo.Text = thickness.ToString() + "px";
             strokeSelect.Text = "Line";
+            UndoButton.MouseEnter += OnMouseEnterButton1;
+            UndoButton.MouseLeave += OnMouseLeaveButton1;
+            RedoButton.MouseLeave += OnMouseLeaveButton2;
+            RedoButton.MouseEnter += OnMouseEnterButton2;
         }
         private Point getAbsolutePoint(Point pointInApp)
         {
@@ -758,7 +771,153 @@ namespace PaintProject
                 
             }
 
+        }
+
+        private void MinimizeWindow(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+        private void MaximizeWindow(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+            {
+                this.WindowState = WindowState.Normal;
+            }
+            else
+            {
+                this.WindowState = WindowState.Maximized;
+            }
+        }
+
+        private void CloseWindow(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+        void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Key == Key.Z)
+                {
+                    if (mainPaper.Children.Count > 0)
+                    {
+                        if(RedoButton.IsEnabled == false)
+                        {
+                            RedoButton.IsEnabled = true;
+                            Border border = RedoButton.FindChildByType<Border>();
+                            border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
+                        }
+                        mainPaper.Children.RemoveAt(mainPaper.Children.Count - 1);
+                    }
+                    if (mainPaper.Children.Count == 0 && UndoButton.IsEnabled)
+                    {
+                        UndoButton.IsEnabled = false;
+                        Border border = UndoButton.FindChildByType<Border>();
+                        border.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                    }
+                }
+                else if (e.Key == Key.Y)
+                {
+                    if (mainPaper.Children.Count < listDrewShapes.Count)
+                    {
+                        if (UndoButton.IsEnabled == false)
+                        {
+                            UndoButton.IsEnabled = true;
+                            Border border = UndoButton.FindChildByType<Border>();
+                            border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
+                        }
+                        IShape shapeRedo = listDrewShapes[mainPaper.Children.Count];
+                        UIElement temp = shapeRedo.Draw(shapeRedo.ColorDrew, shapeRedo.ThicknessDrew, shapeRedo.StrokeDashArray, shapeRedo.ShiftKey);
+                        temp.MouseUp += stopDrawing;
+                        mainPaper.Children.Add(temp);
+                    }
+                    if(mainPaper.Children.Count == listDrewShapes.Count && RedoButton.IsEnabled)
+                    {
+                        RedoButton.IsEnabled = false;
+                        Border border = RedoButton.FindChildByType<Border>();
+                        border.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                    }
+                }
+            }
+        }
+        private void UndoClick(object sender, RoutedEventArgs e)
+        {
+            if (mainPaper.Children.Count > 0)
+            {
+                if (RedoButton.IsEnabled == false)
+                {
+                    RedoButton.IsEnabled = true;
+                    Border border = RedoButton.FindChildByType<Border>();
+                    border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
+                }
+                mainPaper.Children.RemoveAt(mainPaper.Children.Count - 1);
+            }
+            if (mainPaper.Children.Count == 0 && UndoButton.IsEnabled)
+            {
+                UndoButton.IsEnabled = false;
+                Border border = UndoButton.FindChildByType<Border>();
+                border.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+            }
+        }
+
+        private void RedoClick(object sender, RoutedEventArgs e)
+        {
+            if (mainPaper.Children.Count < listDrewShapes.Count)
+            {
+                if (UndoButton.IsEnabled == false)
+                {
+                    UndoButton.IsEnabled = true;
+                    Border border = UndoButton.FindChildByType<Border>();
+                    border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
+                }
+                IShape shapeRedo = listDrewShapes[mainPaper.Children.Count];
+                UIElement temp = shapeRedo.Draw(shapeRedo.ColorDrew, shapeRedo.ThicknessDrew, shapeRedo.StrokeDashArray, shapeRedo.ShiftKey);
+                temp.MouseUp += stopDrawing;
+                mainPaper.Children.Add(temp);
+            }
+            if (mainPaper.Children.Count == listDrewShapes.Count && RedoButton.IsEnabled)
+            {
+                RedoButton.IsEnabled = false;
+                Border border = RedoButton.FindChildByType<Border>();
+                border.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+            }
+        }
+        private void OnMouseEnterButton1(object sender, EventArgs e)
+        {
+            Border border = UndoButton.FindChildByType<Border>();
+            border.Background = new SolidColorBrush(Color.FromRgb(40, 152, 172));
+        }
+        private void OnMouseLeaveButton1(object sender, EventArgs e)
+        {
+            if (UndoButton.IsEnabled)
+            {
+                Border border = UndoButton.FindChildByType<Border>();
+                border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
+            }
+            else
+            {
+                Border border = UndoButton.FindChildByType<Border>();
+                border.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+            }
+        }
+        private void OnMouseEnterButton2(object sender, EventArgs e)
+        {
+            Border border = RedoButton.FindChildByType<Border>();
+            border.Background = new SolidColorBrush(Color.FromRgb(40, 152, 172));
+        }
+        private void OnMouseLeaveButton2(object sender, EventArgs e)
+        {
+            if (RedoButton.IsEnabled)
+            {
+                Border border = RedoButton.FindChildByType<Border>();
+                border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
+            }
+            else
+            {
+                Border border = RedoButton.FindChildByType<Border>();
+                border.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
             }
         }
     }
 }
+

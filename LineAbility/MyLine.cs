@@ -15,6 +15,7 @@ namespace LineAbility
 
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
+        public bool ShiftKey { get; set; }
         public int rotateAngle { get; set; } = 0;
         public DoubleCollection StrokeDashArray { get ; set; } = new DoubleCollection();
 
@@ -31,6 +32,7 @@ namespace LineAbility
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
+            ShiftKey = isShiftKeyPressed;
             if (stroke != null) { StrokeDashArray = stroke; }
             else { stroke = StrokeDashArray; }
             var UI = new Line()

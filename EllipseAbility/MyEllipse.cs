@@ -16,6 +16,7 @@ namespace EllipseAbility
         public string name { get => "Ellipse"; }
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
+        public bool ShiftKey { get; set; }
         public DoubleCollection StrokeDashArray { get; set; } = new DoubleCollection();
         public int rotateAngle { get; set; } = 0;
         public void UpdateStart(Point p)
@@ -31,6 +32,7 @@ namespace EllipseAbility
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
+            ShiftKey = isShiftKeyPressed;
             if (stroke != null) { StrokeDashArray = stroke; }
             else { stroke = StrokeDashArray; }
             double height = Math.Abs(End.Y - Start.Y);

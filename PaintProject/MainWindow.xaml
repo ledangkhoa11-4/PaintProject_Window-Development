@@ -5,11 +5,109 @@
                 xmlns:svg="http://schemas.squidex.io/schemas/svg"
                 Title="MainWindow" Height="800" Width="1400"
                 WindowStartupLocation="CenterScreen"
-        Loaded="Window_Loaded">
+                WindowStyle="None"
+                Loaded="Window_Loaded">
 
 
 
     <DockPanel LastChildFill="True" Background="Gray">
+        <Border DockPanel.Dock="Top" Height="30" Background="White">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button x:Name="UndoButton" Click="UndoClick" IsEnabled="False" Grid.Column="0" >
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Border x:Name="UndoBorder" BorderBrush="White">
+                                <Image Source="/Images/undo.png" x:Name="Image" Width="17" Height="17"></Image>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="UndoBorder" Property="Background" Value="#2898ac" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button x:Name="RedoButton" Click="RedoClick" IsEnabled="False" Grid.Column="1">
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Border x:Name="RedoBorder" BorderBrush="White">
+                                <Image Source="/Images/redo.png" x:Name="Image" Width="17" Height="17"></Image>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="RedoBorder" Property="Background" Value="#2898ac" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Button Grid.Column="0">
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border x:Name="Border" BorderBrush="White">
+                                    <Image Source="/Images/redo.png" x:Name="Image" Width="17" Height="17"></Image>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#2898ac" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Button>
+                <TextBlock Grid.Column="2" Padding="10,5,0,0" Text="MainWindow" />
+                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                    <Button Click="MinimizeWindow" Width="35">
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border x:Name="Border" BorderBrush="White" Background="White">
+                                    <TextBlock Text="__" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#D3D3D3" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Click="MaximizeWindow" Width="35" Background="White">
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border x:Name="Border" BorderBrush="White" Background="White">
+                                    <TextBlock Text="[]" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#D3D3D3" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Click="CloseWindow" Width="35" Background="White">
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border x:Name="Border" BorderBrush="White" Background="White">
+                                    <TextBlock Text="X" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#ff0000" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
         <telerik:RadRibbonView x:Name="ribbon" ApplicationButtonContent="File" Panel.ZIndex="99999" DockPanel.Dock="Top" telerik:StyleManager.Theme="Office2019" ApplicationName="Paint Application" TitleBarVisibility="Collapsed">
             <telerik:RadRibbonView.Items>
                 <telerik:RadRibbonTab Header="Home">

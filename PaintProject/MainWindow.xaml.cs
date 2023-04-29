@@ -952,8 +952,6 @@ namespace PaintProject
                 mainPaper.Cursor = Cursors.Arrow;
             }
         }
-    }
-}
         private void CloseWindow(object sender, RoutedEventArgs e)
         {
             this.Close();
@@ -966,7 +964,7 @@ namespace PaintProject
                 {
                     if (mainPaper.Children.Count > 0)
                     {
-                        if(RedoButton.IsEnabled == false)
+                        if (RedoButton.IsEnabled == false)
                         {
                             RedoButton.IsEnabled = true;
                             Border border = RedoButton.FindChildByType<Border>();
@@ -996,7 +994,7 @@ namespace PaintProject
                         temp.MouseUp += stopDrawing;
                         mainPaper.Children.Add(temp);
                     }
-                    if(mainPaper.Children.Count == listDrewShapes.Count && RedoButton.IsEnabled)
+                    if (mainPaper.Children.Count == listDrewShapes.Count && RedoButton.IsEnabled)
                     {
                         RedoButton.IsEnabled = false;
                         Border border = RedoButton.FindChildByType<Border>();
@@ -1085,4 +1083,5 @@ namespace PaintProject
         }
     }
 }
+  
 

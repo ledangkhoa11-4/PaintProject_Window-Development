@@ -9,7 +9,7 @@
 
 
 
-    <DockPanel LastChildFill="True">
+    <DockPanel LastChildFill="True" Background="Gray">
         <telerik:RadRibbonView x:Name="ribbon" ApplicationButtonContent="File" Panel.ZIndex="99999" DockPanel.Dock="Top" telerik:StyleManager.Theme="Office2019" ApplicationName="Paint Application" TitleBarVisibility="Collapsed">
             <telerik:RadRibbonView.Items>
                 <telerik:RadRibbonTab Header="Home">
@@ -147,8 +147,8 @@
                         </telerik:RadRibbonDropDownButton>
 
                     </telerik:RadRibbonGroup>
-                    <telerik:RadRibbonGroup Header="Tools" Width="177">
-                        <Canvas Margin="-89,0,-86,0">
+                    <telerik:RadRibbonGroup Header="Tools" Width="293">
+                        <Canvas Margin="-147,0,-144,0">
                             <telerik:RadRibbonToggleButton x:Name="bucketFill" Checked="buckerFillChange" Unchecked="buckerFillChange"  CornerRadius="6" BorderThickness="1" BorderBrush="#cccccc" IsChecked="False" VerticalAlignment="Center" telerik:StyleManager.Theme="Fluent" Height="18" Width="42" Canvas.Left="10">
                                 <telerik:RadRibbonToggleButton.Content>
                                     <TextBlock>Fill</TextBlock>
@@ -159,9 +159,17 @@
                             <telerik:RadRibbonToggleButton x:Name="selectElementTg" Checked="selectMode" Unchecked="selectMode"  CornerRadius="6" BorderThickness="1" BorderBrush="#cccccc" IsChecked="False" Width="43" telerik:StyleManager.Theme="Fluent" Height="18" Canvas.Left="10" Canvas.Top="33" VerticalAlignment="Center">
                                 <TextBlock><Run Text="Select"/></TextBlock>
                             </telerik:RadRibbonToggleButton>
+                            <Button Background="Transparent"  Content="🔍+" Width="30" Height="30" Click="ZoomIn_Click" Canvas.Left="221" Canvas.Top="16" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                            <Button Background="Transparent" Content="🔍-" Width="30" Height="30" Click="ZoomOut_Click" Canvas.Left="80" Canvas.Top="16" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0.543,0.468"/>
+                            <Slider x:Name="ZoomSlider" Minimum="0.5" Maximum="8" Value="1" Width="101"
+                ValueChanged="ZoomSlider_ValueChanged" Canvas.Left="115" Canvas.Top="22" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                            <TextBlock Text="100%" x:Name="ZoomPercentage" VerticalAlignment="Top" Canvas.Left="256" Canvas.Top="24" HorizontalAlignment="Center" />
                         </Canvas>
 
 
+                    </telerik:RadRibbonGroup>
+                    <telerik:RadRibbonGroup Header="Insert" Width="204">
+                        <Button Content="⛵ Image" Click="ImportImageButton_Click" Margin="-78,9,34,19" />
                     </telerik:RadRibbonGroup>
                 </telerik:RadRibbonTab>
 
@@ -170,7 +178,7 @@
                 <telerik:RadRibbonBackstage x:Name="myRadRibbonBackstageControl" CloseButtonVisibility="Collapsed">
                     <telerik:RadRibbonBackstageItem Header="Exit"  FontSize="24" CloseOnClick="True" IsSelectable="False" Icon="images/back.png"/>
                     <telerik:RadRibbonBackstageItem Name="SaveBtn"  Header="Save" FontSize="24" Click="SaveBtn_Click" Icon="images/save.png" Foreground="White" IsSelectable="False" CloseOnClick="False">
-                        
+
                     </telerik:RadRibbonBackstageItem>
                     <telerik:RadRibbonBackstageItem Header="Export"  FontSize="24" Icon="images/export.png" >
                         <StackPanel>
@@ -178,21 +186,26 @@
                             <telerik:RadButton Click="ExportPngFile" Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">.PNG File</telerik:RadButton>
                             <telerik:RadButton Click="ExportJpgFile" Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">.JPG File</telerik:RadButton>
                             <telerik:RadButton Click="ExportBmpFile" Margin="10,10,0,10" Width="200" HorizontalAlignment="Left">.BMP File</telerik:RadButton>
-                           
+
                         </StackPanel>
                     </telerik:RadRibbonBackstageItem>
                     <telerik:RadRibbonBackstageItem Name="OpenFileBtn" Header="Open" Click="OpenFileBtn_Click" Icon="images/open.png"  FontSize="24" IsSelectable="False" CloseOnClick="False" />
-                    <telerik:RadRibbonBackstageItem Header="New"  FontSize="24" Icon="images/new.png" IsSelectable="False" CloseOnClick="False"/>
-                   
+                    <telerik:RadRibbonBackstageItem  Name="NewFileBtn" Click="NewFileBtn_Click" Header="New"  FontSize="24" Icon="images/new.png" IsSelectable="False" CloseOnClick="False"/>
+
                 </telerik:RadRibbonBackstage>
             </telerik:RadRibbonView.Backstage>
         </telerik:RadRibbonView>
         
-        <Canvas 
- MouseDown="startingDrawing" MouseMove="drawing" MouseUp="stopDrawing"
-            x:Name="mainPaper" IsEnabled="True" Background="White"  >
-           
-        </Canvas>
+        <ScrollViewer Name="scrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <Canvas x:Name="mainPaper" Background="White" 
+                MouseDown="startingDrawing" MouseMove="drawing" MouseUp="stopDrawing" PreviewMouseWheel="mainPaper_PreviewMouseWheel"
+                Width="{Binding ActualWidth, ElementName=scrollViewer}" Height="{Binding ActualHeight, ElementName=scrollViewer}">
+                <Canvas.LayoutTransform>
+                    <ScaleTransform x:Name="scaleTransform" ScaleX="1" ScaleY="1"/>
+                </Canvas.LayoutTransform>
+
+            </Canvas>
+        </ScrollViewer>
 
     </DockPanel>
 </Window>

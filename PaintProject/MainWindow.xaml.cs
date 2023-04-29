@@ -20,6 +20,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Json;
 using Newtonsoft.Json;
 using System.Windows.Media.Imaging;
+using Telerik.Windows.Controls.Map;
 
 namespace PaintProject
 {
@@ -43,14 +44,13 @@ namespace PaintProject
         private List<IShape> listDrewShapes = new List<IShape>(); //Các hình đã vẽ
         private Color selectedColor = Colors.Black;
         private int thickness = 1;
-        private DoubleCollection stroke;
+        private DoubleCollection stroke = new DoubleCollection();
 
         private bool isBucketFillMode = false;
         private bool isSelectionMode = false;
 
         private IShape selectedShape = null;
         private UIElement sampleUI = null;
-        private UIElement selectedUI = null;
         private Color selectedShapeColor;
         private int selectedShapeThickness = 0;
         private bool isFirstSelected = false;
@@ -58,11 +58,16 @@ namespace PaintProject
         private Point originalStart;
         private Point originalEnd;
         private Cursor bucketCursor;
+        private bool isFileSave=true;
+        private string curFilePath = "";
+        private bool haveImageOrFill=false;
+        private Cursor moveCursor;
         public MainWindow()
         {
             InitializeComponent();
             var folderInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "cursors");
             bucketCursor = new Cursor($"{folderInfo}\\bucket.cur");
+            moveCursor = new Cursor($"{folderInfo}\\move.cur");
         }
 
         private void startingDrawing(object sender, MouseButtonEventArgs e)
@@ -76,7 +81,9 @@ namespace PaintProject
                 Debug.WriteLine(hex);
                 Debug.WriteLine(mouseCoor.X);
                 Debug.WriteLine(mouseCoor.Y);
+                haveImageOrFill = true;
                 ScanLineFill(mouseCoor, color, selectedColor);
+                
                 return;
             }
 
@@ -88,47 +95,65 @@ namespace PaintProject
                 {
                     clickedElement = hitTestResult.VisualHit as UIElement;
                 }
-
+                IShape element = null;
                 // Check if an element was actually clicked
                 if (clickedElement != null)
                 {
-                    Color color;
                     if (clickedElement is System.Windows.Shapes.Line)
                     {
-                        Debug.WriteLine("Line");
                         var line = (System.Windows.Shapes.Line)clickedElement;
                         line.StrokeThickness = thickness;
                         var brush = line.Stroke as SolidColorBrush;
-                        color = brush.Color;
-
-                        var element = listDrewShapes.FirstOrDefault(shape =>
+                        element = listDrewShapes.FirstOrDefault(shape =>
                         {
-                            if (shape.name == "Line" && shape.Start == new Point(line.X1, line.Y1) && shape.End == new Point(line.X2, line.Y2))
-                                return true;
+                            if (shape.name == "Line" && shape.Start == new Point(line.X1, line.Y1) && shape.End == new Point(line.X2, line.Y2)) return true;
                             return false;
                         });
-                        if (element != null)
+                        
+                    }
+                    if (clickedElement is System.Windows.Shapes.Rectangle)
+                    {
+                        var rect = (System.Windows.Shapes.Rectangle)clickedElement;
+                        rect.StrokeThickness = thickness;
+                        var brush = rect.Stroke as SolidColorBrush;
+                        var left = Canvas.GetLeft(rect);
+                        var top = Canvas.GetTop(rect);
+                        element = listDrewShapes.FirstOrDefault(shape =>
                         {
-                            selectedUI = clickedElement;
-                            selectedShapeColor = color;
-                            selectedShapeThickness = thickness;
-                            DashStyle dashStyle = new DashStyle(new double[] { 4, 2 }, 0);
-                            var sampleLine = new System.Windows.Shapes.Line();
-                            sampleLine.StrokeThickness = thickness;
-                            sampleLine.Stroke = new SolidColorBrush(Colors.White);
-                            sampleLine.X1 = line.X1;
-                            sampleLine.Y1 = line.Y1;
-                            sampleLine.X2 = line.X2;
-                            sampleLine.Y2 = line.Y2;
-                            sampleLine.StrokeDashArray = stroke;
-                            mainPaper.Children.Add(sampleLine);
-                            selectedShape = element;
-                            sampleUI = sampleLine;
-                            isFirstSelected = true;
-                            originalStart = selectedShape.Start;
-                            originalEnd = selectedShape.End;
+                            if (shape.name == "Rectangle" && shape.Start == new Point(left, top)) return true;
+                            return false;
+                        });
+                    }
+                    if (clickedElement is System.Windows.Shapes.Ellipse)
+                    {
+                        var ellip = (System.Windows.Shapes.Ellipse)clickedElement;
+                        ellip.StrokeThickness = thickness;
+                        var brush = ellip.Stroke as SolidColorBrush;
+                        var left = Canvas.GetLeft(ellip);
+                        var top = Canvas.GetTop(ellip);
+                        element = listDrewShapes.FirstOrDefault(shape =>
+                        {
+                            if (shape.name == "Ellipse" && shape.Start == new Point(left, top)) return true;
+                            return false;
+                        });
+                    }
+                    if (element != null)
+                    {
+                        DashStyle dashStyle = new DashStyle(new double[] { 4, 2 }, 0);
+                        var sampleShape = _abilities[element.name];
+                        sampleShape.UpdateStart(element.Start);
+                        sampleShape.UpdateEnd(element.End);
+                        var sampleLine = sampleShape.Draw(Colors.White, 2, new DoubleCollection(new double[] { 4, 2 }));
+                        mainPaper.Children.Add(sampleLine);
+                        selectedShape = element;
+                        selectedShapeColor = selectedShape.ColorDrew;
+                        selectedShapeThickness = selectedShape.ThicknessDrew;
+                        sampleUI = sampleLine;
+                        isFirstSelected = true;
+                        originalStart = selectedShape.Start;
+                        originalEnd = selectedShape.End;
+                        lastDraw = clickedElement;
 
-                        }
                     }
                 }
                 return;
@@ -136,15 +161,11 @@ namespace PaintProject
 
             if (isSelectionMode && selectedShape != null)
             {
-                if (selectedShape.name == "Line")
-                {
-                    var sampleline = (System.Windows.Shapes.Line)sampleUI;
-                    mainPaper.Cursor = Cursors.Hand;
-                    startEditPoint = mouseCoor;
-                    Debug.WriteLine("Selected");
-                    Debug.WriteLine($"{startEditPoint.X} - {startEditPoint.Y}");
-                    isFirstSelected = false;
-                }
+                mainPaper.Cursor = moveCursor;
+                startEditPoint = mouseCoor;
+                Debug.WriteLine("Selected");
+                Debug.WriteLine($"{startEditPoint.X} - {startEditPoint.Y}");
+                isFirstSelected = false;
                 return;
 
             }
@@ -182,11 +203,14 @@ namespace PaintProject
 
                 selectedShape.UpdateStart(new Point(originalStart.X + moveX, originalStart.Y + moveY));
                 selectedShape.UpdateEnd(new Point(originalEnd.X + moveX, originalEnd.Y + moveY));
-                var newDraw = selectedShape.Draw(selectedShapeColor, selectedShapeThickness, stroke, isShiftKeyPressed);
+                var newDraw = selectedShape.Draw(selectedShapeColor, selectedShapeThickness, null, isShiftKeyPressed);
                 newDraw.MouseUp += stopDrawing;
-                mainPaper.Children.Remove(selectedUI);
+                if(lastDraw!=null)
+                {
+                    mainPaper.Children.Remove(lastDraw);
+                }
                 mainPaper.Children.Add(newDraw);
-                selectedUI = newDraw;
+                lastDraw = newDraw;
             }
 
         }
@@ -198,6 +222,7 @@ namespace PaintProject
                 Debug.WriteLine("Stop");
                 mainPaper.ReleaseMouseCapture();
                 listDrewShapes.Add((IShape)shape.Clone());
+                isFileSave= false;
                 lastDraw = null;
             }
             Debug.WriteLine("STop");
@@ -420,8 +445,12 @@ namespace PaintProject
             }
             else
             {
+                lastDraw = null;
                 isSelectionMode = false;
                 mainPaper.Cursor = Cursors.Arrow;
+                isFirstSelected = true;
+                selectedShape = null;
+                mainPaper.Children.Remove(sampleUI);
 
             }
         }
@@ -442,6 +471,8 @@ namespace PaintProject
             else if(i == 3) thickness = 8;
             weightInfo.Text = thickness.ToString() + "px";
         }
+
+       
 
         private void ChangeStroke(object sender, SelectionChangedEventArgs e)
         {
@@ -470,18 +501,31 @@ namespace PaintProject
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.FileName = "paint";
-            saveFileDialog.DefaultExt = ".bin";
-            saveFileDialog.Filter = "Files|*.bin;*.dat;*.ccmd";
-
-            if (saveFileDialog.ShowDialog() == true)
+            if (haveImageOrFill)
             {
-                string filePath = saveFileDialog.FileName;
-
-                WriteObjectListToFile(filePath, listDrewShapes);
+                ExportImageFile(new PngBitmapEncoder());
             }
-            ribbon.IsBackstageOpen = false;
+            else
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.FileName = "paint";
+                saveFileDialog.DefaultExt = ".bin";
+                saveFileDialog.Filter = "Files|*.bin;*.dat;*.dkpq";
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    curFilePath = saveFileDialog.FileName;
+
+                    WriteObjectListToFile(curFilePath, listDrewShapes);
+                    isFileSave = true;
+                }
+                else
+                {
+                    isFileSave = false;
+                }
+                ribbon.IsBackstageOpen = false;
+            } 
+            
         }
         void WriteObjectListToFile(string fileName, List<IShape> objectList)
         {
@@ -505,24 +549,68 @@ namespace PaintProject
 
         private void OpenFileBtn_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Files|*.bin;*.dat;*.ccmd";
-            if (openFileDialog.ShowDialog() == true)
+            ribbon.IsBackstageOpen = false;
+            if (!isFileSave && listDrewShapes.Count>0)
             {
-                try
-                {
-                    listDrewShapes = ReadObjectListFromFile(openFileDialog.FileName);
-                    foreach (var shape in listDrewShapes)
-                    {
-                        UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false);
-                        mainPaper.Children.Add(drawshape);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+                string messageBoxText = "Do you want to save changes?";
+                string caption = "Save file";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+                MessageBoxResult result;
 
+                result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.Yes);
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveBtn_Click(sender, e);
+                }
+                else
+                {
+                    isFileSave = true;
+                    OpenFileBtn_Click(sender: this, e: e);
+                    
+                }
+            }
+            else
+            {
+                var openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Files|*.bin;*.dat;*.dkpq;*.jpg;*.png;*.bmp";
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string ext = Path.GetExtension(openFileDialog.FileName).ToLower().Replace(".","");
+                    if (ext == "jpg" || ext == "png" || ext == "bmp")
+                    {
+                        mainPaper.Children.Clear();
+                        
+                        haveImageOrFill = true;
+                        BitmapImage bitmap = new BitmapImage(new Uri(openFileDialog.FileName));
+                        double width = bitmap.Width;
+                        double height = bitmap.Height;
+                        mainPaper.Width = width;
+                        mainPaper.Height = height;
+                        ImageBrush imageBrush = new ImageBrush();
+                        imageBrush.ImageSource = bitmap;
+                        mainPaper.Background = imageBrush;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            mainPaper.Background = null;
+                            mainPaper.Children.Clear();
+                            listDrewShapes = ReadObjectListFromFile(openFileDialog.FileName);
+                            foreach (var shape in listDrewShapes)
+                            {
+                                UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false);
+                                mainPaper.Children.Add(drawshape);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                        }
+                    }
+
+                }
             }
         }
         private void ExportImageFile(BitmapEncoder encoder)
@@ -563,6 +651,114 @@ namespace PaintProject
         private void ExportBmpFile(object sender, RoutedEventArgs e)
         {
             ExportImageFile(new BmpBitmapEncoder());
+        }
+        private void ZoomIn_Click(object sender, RoutedEventArgs e)
+        {
+            double newScale = scaleTransform.ScaleX * 1.1;
+            if (newScale <= 8.0)
+            {
+                scaleTransform.ScaleX = newScale;
+                scaleTransform.ScaleY = newScale;
+                ZoomSlider.Value = newScale;
+                ZoomPercentage.Text = string.Format("{0}%", (int)(newScale * 100));
+            }
+        }
+
+        private void ZoomOut_Click(object sender, RoutedEventArgs e)
+        {
+            double newScale = scaleTransform.ScaleX / 1.1;
+            if (newScale >= 0.125)
+            {
+                scaleTransform.ScaleX = newScale;
+                scaleTransform.ScaleY = newScale;
+                ZoomSlider.Value = newScale;
+                ZoomPercentage.Text = string.Format("{0}%", (int)(newScale * 100));
+            }
+        }
+
+        private void mainPaper_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Delta > 0)
+                {
+                    ZoomIn_Click(null, null);
+                }
+                else if (e.Delta < 0)
+                {
+                    ZoomOut_Click(null, null);
+                }
+                e.Handled = true;
+            }
+        }
+        private void ZoomSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (scaleTransform != null)
+            {
+                double newScale = ZoomSlider.Value;
+                scaleTransform.ScaleX = newScale;
+                scaleTransform.ScaleY = newScale;
+                ZoomPercentage.Text = string.Format("{0}%", (int)(newScale * 100));
+            }
+        }
+        private System.Windows.Controls.Image selectedImage;
+        private Point initialMousePos;
+        private Point initialImagePos;
+
+        private void ImportImageButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            // Create a OpenFileDialog to allow the user to select an image file
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog();
+            openFileDialog.Filter = "Image files (*.png;*.jpeg;*.jpg;*.bmp)|*.png;*.jpeg;*.jpg;*.bmp|All files (*.*)|*.*";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                // Create a new BitmapImage from the selected file
+                var bitmapImage = new BitmapImage(new Uri(openFileDialog.FileName));
+
+                // Create a new Image control and set its Source and Stretch properties
+                var image = new System.Windows.Controls.Image() { Source = bitmapImage, Stretch = Stretch.Fill };
+              
+                // Create a new Viewbox and set its Width, Height, and Child properties
+                var viewbox = new Viewbox() { Width = 200, Height = 200, Child = image };
+
+                // Add the Viewbox to the canvas
+                mainPaper.Children.Add(viewbox);
+                haveImageOrFill = true;
+            }
+        }
+
+        private void NewFileBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ribbon.IsBackstageOpen = false;
+            if (!isFileSave && listDrewShapes.Count > 0)
+            {
+                string messageBoxText = "Do you want to save changes?";
+                string caption = "Save file";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+                MessageBoxResult result;
+
+                result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.Yes);
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveBtn_Click(sender, e);
+                }
+                else
+                {
+                    isFileSave = true;
+                    NewFileBtn_Click(sender: this, e: e);
+
+                }
+            }
+            else
+            {
+                mainPaper.Background= null;
+                
+            }
+
+            }
         }
     }
 }

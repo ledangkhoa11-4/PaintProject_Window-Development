@@ -60,6 +60,7 @@ namespace PaintProject
         private Cursor bucketCursor;
         private bool isFileSave=true;
         private string curFilePath = "";
+        private bool haveImageOrFill=false;
         private Cursor moveCursor;
         public MainWindow()
         {
@@ -80,7 +81,9 @@ namespace PaintProject
                 Debug.WriteLine(hex);
                 Debug.WriteLine(mouseCoor.X);
                 Debug.WriteLine(mouseCoor.Y);
+                haveImageOrFill = true;
                 ScanLineFill(mouseCoor, color, selectedColor);
+                
                 return;
             }
 
@@ -498,7 +501,12 @@ namespace PaintProject
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
-           
+            if (haveImageOrFill)
+            {
+                ExportImageFile(new PngBitmapEncoder());
+            }
+            else
+            {
                 SaveFileDialog saveFileDialog = new SaveFileDialog();
                 saveFileDialog.FileName = "paint";
                 saveFileDialog.DefaultExt = ".bin";
@@ -507,7 +515,7 @@ namespace PaintProject
                 if (saveFileDialog.ShowDialog() == true)
                 {
                     curFilePath = saveFileDialog.FileName;
-                    
+
                     WriteObjectListToFile(curFilePath, listDrewShapes);
                     isFileSave = true;
                 }
@@ -516,7 +524,7 @@ namespace PaintProject
                     isFileSave = false;
                 }
                 ribbon.IsBackstageOpen = false;
-                
+            } 
             
         }
         void WriteObjectListToFile(string fileName, List<IShape> objectList)
@@ -571,6 +579,9 @@ namespace PaintProject
                     string ext = Path.GetExtension(openFileDialog.FileName).ToLower().Replace(".","");
                     if (ext == "jpg" || ext == "png" || ext == "bmp")
                     {
+                        mainPaper.Children.Clear();
+                        
+                        haveImageOrFill = true;
                         BitmapImage bitmap = new BitmapImage(new Uri(openFileDialog.FileName));
                         double width = bitmap.Width;
                         double height = bitmap.Height;
@@ -584,6 +595,7 @@ namespace PaintProject
                     {
                         try
                         {
+                            mainPaper.Background = null;
                             mainPaper.Children.Clear();
                             listDrewShapes = ReadObjectListFromFile(openFileDialog.FileName);
                             foreach (var shape in listDrewShapes)
@@ -695,6 +707,7 @@ namespace PaintProject
 
         private void ImportImageButton_Click(object sender, RoutedEventArgs e)
         {
+
             // Create a OpenFileDialog to allow the user to select an image file
             var openFileDialog = new Microsoft.Win32.OpenFileDialog();
             openFileDialog.Filter = "Image files (*.png;*.jpeg;*.jpg;*.bmp)|*.png;*.jpeg;*.jpg;*.bmp|All files (*.*)|*.*";
@@ -712,6 +725,7 @@ namespace PaintProject
 
                 // Add the Viewbox to the canvas
                 mainPaper.Children.Add(viewbox);
+                haveImageOrFill = true;
             }
         }
 

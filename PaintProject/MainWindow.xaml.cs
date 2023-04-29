@@ -13,19 +13,10 @@ using System.Windows.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using Telerik.Windows.Controls;
-using static System.Net.Mime.MediaTypeNames;
 using Microsoft.Win32;
 using Path = System.IO.Path;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text.Json;
 using Newtonsoft.Json;
 using System.Windows.Media.Imaging;
-using Telerik.Windows.Documents.Spreadsheet.Model.ConditionalFormattings;
-using Telerik.Windows.Documents.Spreadsheet.Expressions.Functions;
-using System.Collections;
-using Telerik.Windows.Core;
-using MediaFoundation.Misc;
-using Telerik.Windows.Controls.Map;
 
 namespace PaintProject
 {
@@ -48,11 +39,12 @@ namespace PaintProject
         private UIElement lastDraw = null; //Hình preview cuối cùng (Không vẽ lại tất cả - Improve số 4)
         private List<IShape> listDrewShapes = new List<IShape>(); //Các hình đã vẽ
         private Color selectedColor = Colors.Black;
-        private int thickness = 1;
+        private int thickness = 3;
         private DoubleCollection stroke = new DoubleCollection();
 
         private bool isBucketFillMode = false;
         private bool isSelectionMode = false;
+        private bool isEraserMode = false;
         private bool isRotate = false;
 
         private IShape selectedShape = null;
@@ -69,12 +61,15 @@ namespace PaintProject
         private bool haveImageOrFill=false;
         private Cursor moveCursor;
         private Cursor rotateCursor;
-       
+        private Cursor eraserCursor;
+        private System.Windows.Controls.Image imageSelected = null;
 
         private Ellipse rotateCircle = null;
         private Point originalCoor;
         private Point anchorPoint;
         private Point startRotatePoint;
+
+        private bool erasering = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -82,6 +77,7 @@ namespace PaintProject
             bucketCursor = new Cursor($"{folderInfo}\\bucket.cur");
             moveCursor = new Cursor($"{folderInfo}\\move.cur");
             rotateCursor = new Cursor($"{folderInfo}\\rotate.cur");
+            eraserCursor = new Cursor($"{folderInfo}\\eraser.cur");
         }
 
         private void startingDrawing(object sender, MouseButtonEventArgs e)
@@ -92,28 +88,20 @@ namespace PaintProject
             {
                 Color color = GetColorAtPoint(mouseInScreen);
                 string hex = "#" + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
-                Debug.WriteLine(hex);
-                Debug.WriteLine(mouseCoor.X);
-                Debug.WriteLine(mouseCoor.Y);
                 haveImageOrFill = true;
                 ScanLineFill(mouseCoor, color, selectedColor);
-                
                 return;
             }
-
             if (isSelectionMode && selectedShape == null)
             {
                 bool isOverrideCirclePoint = false;
                 UIElement clickedElement = null;
                 HitTestResult hitTestResult = VisualTreeHelper.HitTest(mainPaper, mouseCoor);
                 if (hitTestResult != null && hitTestResult.VisualHit != null)
-                {
                     clickedElement = hitTestResult.VisualHit as UIElement;
-                }
                 IShape element = null;
                 int width = 0;
                 int height = 0;
-                // Check if an element was actually clicked
                 if (clickedElement != null)
                 {
                     if (clickedElement is System.Windows.Shapes.Line)
@@ -131,8 +119,6 @@ namespace PaintProject
                             }
                             return false;
                         });
-                       
-
                     }
                     if (clickedElement is System.Windows.Shapes.Rectangle)
                     {
@@ -172,9 +158,26 @@ namespace PaintProject
                             return false;
                         });
                     }
+                    if (clickedElement is System.Windows.Controls.Image)
+                    {
+                        var image = (System.Windows.Controls.Image)clickedElement;
+                        element = _abilities["Rectangle"];
+                        element.UpdateStart(new Point(Canvas.GetLeft(image), Canvas.GetTop(image)));
+                        element.UpdateEnd(new Point(Canvas.GetLeft(image) + image.ActualWidth, Canvas.GetTop(image) + image.ActualHeight));
+                        originalCoor = new Point(Canvas.GetLeft(image) + image.ActualWidth/2, Canvas.GetTop(image) + image.ActualHeight/2);
+                        var imageTrans = image.RenderTransform as RotateTransform;
+                        if (imageTrans != null)
+                            element.rotateAngle = (int)imageTrans.Angle;
+                        imageSelected = image;
+                    }
                     if (element != null)
                     {
-                        DashStyle dashStyle = new DashStyle(new double[] { 4, 2 }, 0);
+                        selectedShape = element;
+                        originalStart = selectedShape.Start;
+                        originalEnd = selectedShape.End;
+                        selectedShapeColor = selectedShape.ColorDrew;
+                        selectedShapeThickness = selectedShape.ThicknessDrew;
+
                         var sampleShape = _abilities[element.name];
                         var sampleCanvas = new Canvas();
                         Canvas.SetLeft(sampleCanvas, Math.Min(element.Start.X, element.End.X));
@@ -182,7 +185,6 @@ namespace PaintProject
                         sampleCanvas.Width = Math.Abs(element.Start.X - element.End.X);
                         sampleCanvas.Height = Math.Abs(element.Start.Y - element.End.Y);
                         var topLeft = new Point(Canvas.GetLeft(sampleCanvas), Canvas.GetTop(sampleCanvas));
-
                         if (topLeft != element.Start && topLeft != element.End)
                         {
                             sampleShape.UpdateStart(new Point(0, sampleCanvas.Height));
@@ -193,29 +195,17 @@ namespace PaintProject
                             sampleShape.UpdateStart(new Point(0, 0));
                             sampleShape.UpdateEnd(new Point(sampleCanvas.Width, sampleCanvas.Height));
                         }
-                          
-
                         sampleCanvas.RenderTransform = new RotateTransform(element.rotateAngle, sampleCanvas.Width/2, sampleCanvas.Height/2);
-                        
-
-                        
                         var sampleLine = sampleShape.Draw(Colors.Thistle, 2, new DoubleCollection(new double[] { 4, 2 }),false);
-                       
-                        selectedShape = element;
-                        selectedShapeColor = selectedShape.ColorDrew;
-                        selectedShapeThickness = selectedShape.ThicknessDrew;
                         sampleUI = sampleCanvas;
                         isFirstSelected = true;
-                        originalStart = selectedShape.Start;
-                        originalEnd = selectedShape.End;
                         lastDraw = clickedElement;
-
+                        
                         rotateCircle = new Ellipse();
                         rotateCircle.Width = 8; rotateCircle.Height = 8;
                         rotateCircle.Stroke = new SolidColorBrush(Colors.Red);
                         rotateCircle.Fill = new SolidColorBrush(Colors.White);
                         rotateCircle.StrokeThickness = 1;
-                        
                         if(isOverrideCirclePoint)
                             anchorPoint = new Point(sampleShape.Start.X, sampleShape.Start.Y);
                         else
@@ -226,7 +216,6 @@ namespace PaintProject
                         sampleCanvas.Children.Add(rotateCircle);
                         sampleCanvas.Children.Add(sampleLine);
                         mainPaper.Children.Add(sampleCanvas);
-
                     }
                 }
                 return;
@@ -244,25 +233,26 @@ namespace PaintProject
                         startRotatePoint = mouseCoor;
                         return;
                     }
-
-                   
                 }
                 mainPaper.Cursor = moveCursor;
                 startEditPoint = mouseCoor;
-                Debug.WriteLine("Selected");
-                Debug.WriteLine($"{startEditPoint.X} - {startEditPoint.Y}");
                 isFirstSelected = false;
                 return;
 
             }
+            if (isEraserMode == true)
+            {
+                erasering = true;
+                return;
+            }
             isDrawing = true;
             startPoint = mouseCoor;
             shape.UpdateStart(startPoint);
-            Debug.WriteLine("Start");
             mainPaper.CaptureMouse();
         }
         private void drawing(object sender, MouseEventArgs e)
         {
+           
             Point mouseCoor = e.GetPosition(mainPaper);
             if (isDrawing)
             {
@@ -286,18 +276,25 @@ namespace PaintProject
             {
                 var moveX = mouseCoor.X - startEditPoint.X;
                 var moveY = mouseCoor.Y - startEditPoint.Y;
-
-                selectedShape.UpdateStart(new Point(originalStart.X + moveX, originalStart.Y + moveY));
-                selectedShape.UpdateEnd(new Point(originalEnd.X + moveX, originalEnd.Y + moveY));
-                var newDraw = selectedShape.Draw(selectedShapeColor, selectedShapeThickness, null, isShiftKeyPressed, selectedShape.rotateAngle);
-                newDraw.MouseUp += stopDrawing;
-                if(lastDraw!=null)
+                if (imageSelected == null)
                 {
-                    mainPaper.Children.Remove(lastDraw);
+                    selectedShape.UpdateStart(new Point(originalStart.X + moveX, originalStart.Y + moveY));
+                    selectedShape.UpdateEnd(new Point(originalEnd.X + moveX, originalEnd.Y + moveY));
+                    var newDraw = selectedShape.Draw(selectedShapeColor, selectedShapeThickness, null, isShiftKeyPressed, selectedShape.rotateAngle);
+                    newDraw.MouseUp += stopDrawing;
+                    if(lastDraw!=null)
+                    {
+                        mainPaper.Children.Remove(lastDraw);
+                    }
+                    mainPaper.Children.Add(newDraw);
+                    lastDraw = newDraw;
+                    mainPaper.Children.Remove(rotateCircle);
                 }
-                mainPaper.Children.Add(newDraw);
-                lastDraw = newDraw;
-                mainPaper.Children.Remove(rotateCircle);
+                else
+                {
+                    Canvas.SetLeft(imageSelected,originalStart.X + moveX);
+                    Canvas.SetTop(imageSelected,originalStart.Y + moveY);
+                }
             }
             if (isSelectionMode == true && isRotate)
             {
@@ -305,18 +302,46 @@ namespace PaintProject
                 var defaultDegree = (int)(defaultRad * 180 / Math.PI);
                 var angleRad = Math.Atan2(mouseCoor.Y-originalCoor.Y, mouseCoor.X-originalCoor.X);
                 var angleDeg= (int)(angleRad * 180 / Math.PI);
-                var newDraw = selectedShape.Draw(selectedShapeColor, selectedShapeThickness, null, isShiftKeyPressed, angleDeg - defaultDegree );
-                newDraw.MouseUp += stopDrawing;
-                if (lastDraw != null)
+
+                if (imageSelected == null)
                 {
-                    mainPaper.Children.Remove(lastDraw);
+                    var newDraw = selectedShape.Draw(selectedShapeColor, selectedShapeThickness, null, isShiftKeyPressed, angleDeg - defaultDegree);
+                    newDraw.MouseUp += stopDrawing;
+                    if (lastDraw != null)
+                    {
+                        mainPaper.Children.Remove(lastDraw);
+                    }
+                    mainPaper.Children.Add(newDraw);
+                    lastDraw = newDraw;
+                    mainPaper.Children.Remove(rotateCircle);
                 }
-                mainPaper.Children.Add(newDraw);
-                lastDraw = newDraw;
-                mainPaper.Children.Remove(rotateCircle);
+                else
+                {
+                    imageSelected.RenderTransform = new RotateTransform(angleDeg - defaultDegree,  imageSelected.ActualWidth/2,  imageSelected.ActualHeight/2);
+                }
                 mainPaper.Cursor = rotateCursor;
             }
-
+            if (erasering)
+            {
+                HitTestResult hitTestResult = VisualTreeHelper.HitTest(mainPaper, mouseCoor);
+                if (hitTestResult != null && hitTestResult.VisualHit != null)
+                {
+                    var clickedEle = hitTestResult.VisualHit as UIElement;
+                    var top = Canvas.GetTop(clickedEle);
+                    var left = Canvas.GetLeft(clickedEle);
+                    if (clickedEle is Line)
+                    {
+                        var line = (Line)clickedEle;
+                        left = line.X1;
+                        top = line.Y1;
+                    }
+                    var ishapeSelected = listDrewShapes.FirstOrDefault(shape => shape.Start == new Point(left, top));
+                    if(ishapeSelected != null) { 
+                        listDrewShapes.Remove(ishapeSelected);
+                        mainPaper.Children.Remove(clickedEle);
+                    }
+                }
+            }
         }
         private void stopDrawing(object sender, MouseButtonEventArgs e)
         {
@@ -329,26 +354,32 @@ namespace PaintProject
                 isFileSave= false;
                 lastDraw = null;
             }
-            Debug.WriteLine("STop");
+           
             if (isSelectionMode && selectedShape != null && !isFirstSelected)
             {
-                Debug.WriteLine("STop");
+           
                 mainPaper.Cursor = Cursors.Arrow;
                 isFirstSelected = true;
                 selectedShape = null;
                 mainPaper.Children.Remove(sampleUI);
                 mainPaper.Children.Remove(rotateCircle);
+                imageSelected = null;
             }
             if (isSelectionMode && isRotate)
             {
-                Debug.WriteLine("STop");
                 mainPaper.Cursor = Cursors.Arrow;
                 isFirstSelected = true;
                 selectedShape = null;
                 mainPaper.Children.Remove(sampleUI);
                 mainPaper.Children.Remove(rotateCircle);
+                imageSelected = null;
                 isRotate = false;
             }
+            if(isEraserMode == true)
+            {
+                erasering = false;
+            }
+            
         }
        
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -435,6 +466,7 @@ namespace PaintProject
             {
                 isBucketFillMode = true;
                 selectElementTg.IsChecked = false;
+                eraserElementTg.IsChecked = false;
                 mainPaper.Cursor = bucketCursor;
             }
             else
@@ -551,6 +583,7 @@ namespace PaintProject
             shape = _abilities[name];
             bucketFill.IsChecked = false;
             selectElementTg.IsChecked = false;
+            eraserElementTg.IsChecked = false;
         }
 
         private void selectMode(object sender, RoutedEventArgs e)
@@ -559,6 +592,7 @@ namespace PaintProject
             {
                 isSelectionMode = true;
                 bucketFill.IsChecked = false;
+                eraserElementTg.IsChecked = false;
 
             }
             else
@@ -826,24 +860,19 @@ namespace PaintProject
 
         private void ImportImageButton_Click(object sender, RoutedEventArgs e)
         {
-
             // Create a OpenFileDialog to allow the user to select an image file
             var openFileDialog = new Microsoft.Win32.OpenFileDialog();
             openFileDialog.Filter = "Image files (*.png;*.jpeg;*.jpg;*.bmp)|*.png;*.jpeg;*.jpg;*.bmp|All files (*.*)|*.*";
 
             if (openFileDialog.ShowDialog() == true)
             {
-                // Create a new BitmapImage from the selected file
                 var bitmapImage = new BitmapImage(new Uri(openFileDialog.FileName));
-
-                // Create a new Image control and set its Source and Stretch properties
                 var image = new System.Windows.Controls.Image() { Source = bitmapImage, Stretch = Stretch.Fill };
-              
-                // Create a new Viewbox and set its Width, Height, and Child properties
-                var viewbox = new Viewbox() { Width = 200, Height = 200, Child = image };
-
-                // Add the Viewbox to the canvas
-                mainPaper.Children.Add(viewbox);
+                image.Width = 200;
+                image.Height = 200;
+                Canvas.SetLeft(image, 0);
+                Canvas.SetTop(image, 0);
+                mainPaper.Children.Add(image);
                 haveImageOrFill = true;
             }
         }
@@ -875,6 +904,23 @@ namespace PaintProject
             {
                 mainPaper.Background= null;
                 
+            }
+        }
+
+        private void eraserMode(object sender, RoutedEventArgs e)
+        {
+            if (eraserElementTg.IsChecked == true)
+            {
+                isEraserMode = true;
+                bucketFill.IsChecked = false;
+                selectElementTg.IsChecked = false;
+                mainPaper.Cursor = eraserCursor;
+
+            }
+            else
+            {
+                isEraserMode = false;
+                mainPaper.Cursor = Cursors.Arrow;
             }
         }
     }

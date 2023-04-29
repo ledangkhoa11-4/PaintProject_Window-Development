@@ -714,12 +714,12 @@ namespace PaintProject
                     {
                         try
                         {
-                            mainPaper.Background = null;
+                            mainPaper.Background = new SolidColorBrush(Colors.White);
                             mainPaper.Children.Clear();
                             listDrewShapes = ReadObjectListFromFile(openFileDialog.FileName);
                             foreach (var shape in listDrewShapes)
                             {
-                                UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false);
+                                UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle);
                                 mainPaper.Children.Add(drawshape);
                             }
                         }

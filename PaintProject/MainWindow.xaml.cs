@@ -729,5 +729,36 @@ namespace PaintProject
             }
         }
 
+        private void NewFileBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ribbon.IsBackstageOpen = false;
+            if (!isFileSave && listDrewShapes.Count > 0)
+            {
+                string messageBoxText = "Do you want to save changes?";
+                string caption = "Save file";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+                MessageBoxResult result;
+
+                result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.Yes);
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveBtn_Click(sender, e);
+                }
+                else
+                {
+                    isFileSave = true;
+                    NewFileBtn_Click(sender: this, e: e);
+
+                }
+            }
+            else
+            {
+                mainPaper.Background= null;
+                
+            }
+
+            }
+        }
     }
 }

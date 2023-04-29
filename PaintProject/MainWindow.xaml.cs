@@ -443,23 +443,6 @@ namespace PaintProject
             weightInfo.Text = thickness.ToString() + "px";
         }
 
-        private void ColorPickerChanged(object sender, EventArgs e)
-        {
-            RadColorPicker colorPicker = sender as RadColorPicker;
-            selectedColor = colorPicker.SelectedColor;
-
-        }
-
-        private void ChangeWeight(object sender, SelectionChangedEventArgs e)
-        {
-            int i = listWeight.SelectedIndex;
-            if (i == 0) thickness = 1;
-            else if (i == 1) thickness = 3;
-            else if (i == 2) thickness = 5;
-            else if (i == 3) thickness = 8;
-            weightInfo.Text = thickness.ToString() + "px";
-        }
-
         private void ChangeStroke(object sender, SelectionChangedEventArgs e)
         {
             int i = listStroke.SelectedIndex;

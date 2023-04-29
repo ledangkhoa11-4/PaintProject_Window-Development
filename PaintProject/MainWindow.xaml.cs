@@ -876,8 +876,6 @@ namespace PaintProject
                 mainPaper.Background= null;
                 
             }
-
-            }
         }
     }
 }

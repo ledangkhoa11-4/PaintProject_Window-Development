@@ -82,7 +82,7 @@ namespace EllipseAbility
                 scaleTransform.ScaleX = -1;
             }
 
-            Point center = new Point(Start.X + shape.Width / 2, Start.Y + shape.Height / 2);
+            Point center = new Point(shape.Width / 2, shape.Height / 2);
             rotateAngle = angle;
             RotateTransform rotateTransform = new RotateTransform(rotateAngle, center.X, center.Y);    
             transformGroup.Children.Add(rotateTransform);

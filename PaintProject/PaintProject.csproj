@@ -51,6 +51,9 @@
     <Content Include="images\undo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="images\eraser.png" />
+    <Resource Include="images\paint-bucket.png" />
+    <Resource Include="images\selection.png" />
     <Resource Include="images\open.png" />
     <Resource Include="images\export.png" />
     <Resource Include="images\back.png" />
@@ -90,6 +93,18 @@
   
   <ItemGroup>
     <Content Include="cursors\move.cur">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="cursors\rotate.cur">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="cursors\eraser.cur">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

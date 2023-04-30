@@ -49,7 +49,7 @@ namespace PaintProject
         private bool isRotate = false;
 
         private IShape selectedShape = null;
-        private UIElement sampleUI = null;
+        private Canvas sampleUI = null;
         private Color selectedShapeColor;
         private int selectedShapeThickness = 0;
         private bool isFirstSelected = false;
@@ -341,7 +341,7 @@ namespace PaintProject
                         left = line.X1;
                         top = line.Y1;
                     }
-                    if (clickedEle is Rectangle)
+                    if (clickedEle is Rectangle || clickedEle is Image)
                     {
                         mainPaper.Children.Remove(clickedEle);
                     }
@@ -396,7 +396,7 @@ namespace PaintProject
                 border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
             }
         }
-       
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.PreviewKeyDown += Window_PreviewKeyDown;
@@ -426,6 +426,12 @@ namespace PaintProject
                         _abilities.Add(shape!.name, shape);
                     }
                 }
+            }
+            if (_abilities.Count == 0)
+            {
+                var dialog = MessageBox.Show("No possibility drawings found. Please add more ability dll!!!", "No ability found",MessageBoxButton.OK,MessageBoxImage.Error);
+                if(dialog == MessageBoxResult.OK)
+                    System.Windows.Application.Current.Shutdown();
             }
             bool ischecked = true;
             foreach (var ability in _abilities)
@@ -473,7 +479,7 @@ namespace PaintProject
             try
             {
                 var x = PointToScreen(pointInApp).X;
-                var y = PointToScreen(pointInApp).Y + ribbon.ActualHeight;
+                var y = PointToScreen(pointInApp).Y + ribbon.ActualHeight + header.ActualHeight;
                 return new Point(x, y);
             }
             catch
@@ -633,6 +639,15 @@ namespace PaintProject
         {
             RadColorPicker colorPicker = sender as RadColorPicker;
             selectedColor = colorPicker.SelectedColor;
+            if(isSelectionMode && selectedShape != null) {
+                mainPaper.Children.Remove(lastDraw);
+                mainPaper.Children.Remove(sampleUI);
+                var newDrawColor = selectedShape.Draw(selectedColor, selectedShapeThickness, selectedShape.StrokeDashArray, false, selectedShape.rotateAngle);
+                selectedShapeColor = selectedColor;
+                mainPaper.Children.Add(newDrawColor);
+                mainPaper.Children.Add(sampleUI);
+                lastDraw = newDrawColor;
+            }
 
         }
 
@@ -644,9 +659,18 @@ namespace PaintProject
             else if(i == 2) thickness = 5;
             else if(i == 3) thickness = 8;
             weightInfo.Text = thickness.ToString() + "px";
-        }
 
-       
+            if (isSelectionMode && selectedShape != null)
+            {
+                mainPaper.Children.Remove(sampleUI);
+                mainPaper.Children.Remove(lastDraw);
+                var newDrawColor = selectedShape.Draw(selectedShapeColor, thickness, selectedShape.StrokeDashArray, false, selectedShape.rotateAngle);
+                selectedShapeThickness = thickness;
+                mainPaper.Children.Add(newDrawColor);
+                mainPaper.Children.Add(sampleUI);
+                lastDraw = newDrawColor;
+            }
+        }
 
         private void ChangeStroke(object sender, SelectionChangedEventArgs e)
         {
@@ -670,6 +694,16 @@ namespace PaintProject
             {
                 strokeSelect.Text = "Dash Dot Dot";
                 stroke = new DoubleCollection() { 4, 1, 1, 1, 1, 1 };
+            }
+
+            if (isSelectionMode && selectedShape != null)
+            {
+                mainPaper.Children.Remove(sampleUI);
+                mainPaper.Children.Remove(lastDraw);
+                var newDrawColor = selectedShape.Draw(selectedShapeColor, thickness, stroke, false, selectedShape.rotateAngle);
+                mainPaper.Children.Add(newDrawColor);
+                mainPaper.Children.Add(sampleUI);
+                lastDraw = newDrawColor;
             }
         }
 

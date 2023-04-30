@@ -69,6 +69,7 @@ namespace PaintProject
         private Point originalCoor;
         private Point anchorPoint;
         private Point startRotatePoint;
+        private RecentFilesManager recentFilesManager;
 
         private bool erasering = false;
         public MainWindow()
@@ -79,6 +80,8 @@ namespace PaintProject
             moveCursor = new Cursor($"{folderInfo}\\move.cur");
             rotateCursor = new Cursor($"{folderInfo}\\rotate.cur");
             eraserCursor = new Cursor($"{folderInfo}\\eraser.cur");
+            recentFilesManager=new RecentFilesManager();
+            recentFilesManager.LoadRecentFiles();
         }
 
         private void startingDrawing(object sender, MouseButtonEventArgs e)
@@ -396,6 +399,7 @@ namespace PaintProject
 
             this.PreviewKeyUp += Window_PreviewKeyUp;
             this.KeyDown += MainWindow_KeyDown;
+            this.DataContext = recentFilesManager.RecentFiles;
             var domain = AppDomain.CurrentDomain;
             var folder = domain.BaseDirectory;
 
@@ -669,6 +673,7 @@ namespace PaintProject
             if (haveImageOrFill)
             {
                 ExportImageFile(new PngBitmapEncoder());
+                isFileSave = true;
             }
             else
             {
@@ -683,6 +688,7 @@ namespace PaintProject
 
                     WriteObjectListToFile(curFilePath, listDrewShapes);
                     isFileSave = true;
+                    recentFilesManager.AddRecentFile(Path.GetFileName(saveFileDialog.FileName), saveFileDialog.FileName);
                 }
                 else
                 {
@@ -774,6 +780,8 @@ namespace PaintProject
                             MessageBox.Show(ex.Message);
                         }
                     }
+                    recentFilesManager.AddRecentFile(Path.GetFileName(openFileDialog.FileName), openFileDialog.FileName);
+
 
                 }
             }
@@ -786,6 +794,7 @@ namespace PaintProject
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.DefaultExt = encoder.GetType().ToString().ToLower().Replace("bitmapencoder", "");
             saveFileDialog.FileName = "paint";
+            saveFileDialog.Filter = "Files|*.jpg;*.png";
             saveFileDialog.OverwritePrompt = true;
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -794,6 +803,7 @@ namespace PaintProject
                     using (FileStream fs = File.Create(saveFileDialog.FileName))
                     {
                         encoder.Save(fs);
+                        recentFilesManager.AddRecentFile(Path.GetFileName(saveFileDialog.FileName),saveFileDialog.FileName);
                     }
                 }catch(Exception ex)
                 {
@@ -1080,6 +1090,75 @@ namespace PaintProject
                 Border border = RedoButton.FindChildByType<Border>();
                 border.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
             }
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            recentFilesManager.SaveRecentFiles();
+
+        }
+        private void OnRecentFileClicked(object sender, RoutedEventArgs e)
+        {
+            var buttonSend = (RadRibbonButton)sender;
+            var recentFile = (RecentFile)buttonSend.DataContext;
+            var filePath = recentFile.FilePath;
+            if (!isFileSave && listDrewShapes.Count > 0)
+            {
+                string messageBoxText = "Do you want to save changes?";
+                string caption = "Save file";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+                MessageBoxResult result;
+
+                result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.Yes);
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveBtn_Click(sender, e);
+                }
+                else
+                {
+                    isFileSave = true;
+                    OnRecentFileClicked(sender: this, e: e);
+
+                }
+            }
+            else
+            {
+                string ext = Path.GetExtension(filePath).ToLower().Replace(".", "");
+                if (ext == "jpg" || ext == "png" || ext == "bmp")
+                {
+                    mainPaper.Children.Clear();
+
+                    haveImageOrFill = true;
+                    BitmapImage bitmap = new BitmapImage(new Uri(filePath));
+                    double width = bitmap.Width;
+                    double height = bitmap.Height;
+                    mainPaper.Width = width;
+                    mainPaper.Height = height;
+                    ImageBrush imageBrush = new ImageBrush();
+                    imageBrush.ImageSource = bitmap;
+                    mainPaper.Background = imageBrush;
+                }
+                else
+                {
+                    try
+                    {
+                        mainPaper.Background = new SolidColorBrush(Colors.White);
+                        mainPaper.Children.Clear();
+                        listDrewShapes = ReadObjectListFromFile(filePath);
+                        foreach (var shape in listDrewShapes)
+                        {
+                            UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle);
+                            mainPaper.Children.Add(drawshape);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+            }
+            ribbon.IsBackstageOpen = false;
         }
     }
 }

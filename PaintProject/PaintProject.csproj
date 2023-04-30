@@ -31,6 +31,8 @@
     <DependentUpon>MainWindow.xaml</DependentUpon>
     <SubType>Code</SubType>
   </Compile>
+  <Compile Include="RecentFile.cs" />
+  <Compile Include="RecentFileManager.cs" />
 </ItemGroup>
   
   <ItemGroup>
@@ -45,6 +47,11 @@
     <Content Include="Fonts\Lato-Thin.ttf" />
     <Content Include="Fonts\Lato-ThinItalic.ttf" />
     <Content Include="Fonts\OFL.txt" />
+    <Resource Include="data\recent_files.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\document.png" />
+    <Resource Include="images\folder.png" />
     <Content Include="images\redo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

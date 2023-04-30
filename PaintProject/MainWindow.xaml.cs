@@ -716,22 +716,30 @@ namespace PaintProject
             }
             else
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
-                saveFileDialog.FileName = "paint";
-                saveFileDialog.DefaultExt = ".bin";
-                saveFileDialog.Filter = "Files|*.bin;*.dat;*.dkpq";
-
-                if (saveFileDialog.ShowDialog() == true)
+                if (curFilePath == "")
                 {
-                    curFilePath = saveFileDialog.FileName;
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.FileName = "paint";
+                    saveFileDialog.DefaultExt = ".bin";
+                    saveFileDialog.Filter = "Files|*.bin;*.dat;*.dkpq";
 
-                    WriteObjectListToFile(curFilePath, listDrewShapes);
-                    isFileSave = true;
-                    recentFilesManager.AddRecentFile(Path.GetFileName(saveFileDialog.FileName), saveFileDialog.FileName);
+                    if (saveFileDialog.ShowDialog() == true)
+                    {
+                        curFilePath = saveFileDialog.FileName;
+
+                        WriteObjectListToFile(curFilePath, listDrewShapes);
+                        isFileSave = true;
+                        Title = Path.GetFileName(saveFileDialog.FileName) + "- Paint";
+                        recentFilesManager.AddRecentFile(Path.GetFileName(saveFileDialog.FileName), saveFileDialog.FileName);
+                    }
+                    else
+                    {
+                        isFileSave = false;
+                    }
                 }
                 else
                 {
-                    isFileSave = false;
+                    WriteObjectListToFile(curFilePath, listDrewShapes);
                 }
                 ribbon.IsBackstageOpen = false;
             } 
@@ -786,6 +794,8 @@ namespace PaintProject
                 openFileDialog.Filter = "Files|*.bin;*.dat;*.dkpq;*.jpg;*.png;*.bmp";
                 if (openFileDialog.ShowDialog() == true)
                 {
+                    curFilePath= openFileDialog.FileName;
+                    Title = Path.GetFileName(openFileDialog.FileName) + "- Paint";
                     string ext = Path.GetExtension(openFileDialog.FileName).ToLower().Replace(".","");
                     if (ext == "jpg" || ext == "png" || ext == "bmp")
                     {
@@ -831,14 +841,16 @@ namespace PaintProject
             rtb.Render(mainPaper);
             encoder.Frames.Add(BitmapFrame.Create(rtb));
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.DefaultExt = encoder.GetType().ToString().ToLower().Replace("bitmapencoder", "");
+            saveFileDialog.DefaultExt = encoder.GetType().ToString().ToLower().Replace("bitmapencoder", "").Replace("system.windows.media.imaging", "");
             saveFileDialog.FileName = "paint";
-            saveFileDialog.Filter = "Files|*.jpg;*.png";
+            
             saveFileDialog.OverwritePrompt = true;
             if (saveFileDialog.ShowDialog() == true)
             {
                 try
                 {
+                    curFilePath= saveFileDialog.FileName;
+                    Title= Path.GetFileName(curFilePath)+"- Paint";
                     using (FileStream fs = File.Create(saveFileDialog.FileName))
                     {
                         encoder.Save(fs);
@@ -853,6 +865,7 @@ namespace PaintProject
         private void ExportPngFile(object sender, RoutedEventArgs e)
         {
             ExportImageFile(new PngBitmapEncoder());
+            isFileSave = true;
 
 
         }
@@ -860,11 +873,13 @@ namespace PaintProject
         private void ExportJpgFile(object sender, RoutedEventArgs e)
         {
             ExportImageFile(new JpegBitmapEncoder());
+            isFileSave = true;
         }
 
         private void ExportBmpFile(object sender, RoutedEventArgs e)
         {
             ExportImageFile(new BmpBitmapEncoder());
+            isFileSave = true;
         }
         private void ZoomIn_Click(object sender, RoutedEventArgs e)
         {

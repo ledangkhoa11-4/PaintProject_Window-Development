@@ -109,7 +109,7 @@
 
                     </telerik:RadRibbonGroup>
                     <telerik:RadRibbonGroup Header="Stroke type" Width="128">
-                        <telerik:RadRibbonDropDownButton x:Name="strokeSelect" FontSize="10" VerticalAlignment="Center" telerik:StyleManager.Theme="Material" Width="100">
+                        <telerik:RadRibbonDropDownButton x:Name="strokeSelect" FontSize="16" VerticalAlignment="Center" telerik:StyleManager.Theme="Material" Width="100">
                             <telerik:RadRibbonDropDownButton.DropDownContent>
                                 <ListBox x:Name="listStroke" Width="150" SelectionMode="Single" SelectionChanged="ChangeStroke" HorizontalAlignment="Center">
                                     <ListBoxItem Height="30" HorizontalAlignment="Center">

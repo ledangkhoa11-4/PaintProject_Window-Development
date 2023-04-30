@@ -326,6 +326,7 @@ namespace PaintProject
                 HitTestResult hitTestResult = VisualTreeHelper.HitTest(mainPaper, mouseCoor);
                 if (hitTestResult != null && hitTestResult.VisualHit != null)
                 {
+
                     var clickedEle = hitTestResult.VisualHit as UIElement;
                     var top = Canvas.GetTop(clickedEle);
                     var left = Canvas.GetLeft(clickedEle);
@@ -334,6 +335,10 @@ namespace PaintProject
                         var line = (Line)clickedEle;
                         left = line.X1;
                         top = line.Y1;
+                    }
+                    if (clickedEle is Rectangle)
+                    {
+                        mainPaper.Children.Remove(clickedEle);
                     }
                     var ishapeSelected = listDrewShapes.FirstOrDefault(shape => shape.Start == new Point(left, top));
                     if(ishapeSelected != null) { 
@@ -902,7 +907,7 @@ namespace PaintProject
             }
             else
             {
-                mainPaper.Background= null;
+                mainPaper.Background= new SolidColorBrush(Colors.White);
                 
             }
         }

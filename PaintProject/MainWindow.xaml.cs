@@ -832,7 +832,7 @@ namespace PaintProject
         private void ZoomOut_Click(object sender, RoutedEventArgs e)
         {
             double newScale = scaleTransform.ScaleX / 1.1;
-            if (newScale >= 0.125)
+            if (newScale >= 0.1)
             {
                 scaleTransform.ScaleX = newScale;
                 scaleTransform.ScaleY = newScale;
@@ -866,9 +866,7 @@ namespace PaintProject
                 ZoomPercentage.Text = string.Format("{0}%", (int)(newScale * 100));
             }
         }
-        private System.Windows.Controls.Image selectedImage;
-        private Point initialMousePos;
-        private Point initialImagePos;
+        
 
         private void ImportImageButton_Click(object sender, RoutedEventArgs e)
         {
@@ -880,8 +878,8 @@ namespace PaintProject
             {
                 var bitmapImage = new BitmapImage(new Uri(openFileDialog.FileName));
                 var image = new System.Windows.Controls.Image() { Source = bitmapImage, Stretch = Stretch.Fill };
-                image.Width = 200;
-                image.Height = 200;
+                image.Width = 500;
+                
                 Canvas.SetLeft(image, 0);
                 Canvas.SetTop(image, 0);
                 mainPaper.Children.Add(image);

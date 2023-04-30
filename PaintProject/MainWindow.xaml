@@ -262,7 +262,7 @@
 
                             <Button Background="Transparent"  Content="🔍+" Width="30" Height="30" Click="ZoomIn_Click" Canvas.Left="221" Canvas.Top="21" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                             <Button Background="Transparent" Content="🔍-" Width="30" Height="30" Click="ZoomOut_Click" Canvas.Left="67" Canvas.Top="21" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0.543,0.468"/>
-                            <Slider x:Name="ZoomSlider" Minimum="0.5" Maximum="8" Value="1" Width="114"
+                            <Slider x:Name="ZoomSlider" Minimum="0.1" Maximum="8" Value="1" Width="114"
                 ValueChanged="ZoomSlider_ValueChanged" Canvas.Left="102" Canvas.Top="27" HorizontalAlignment="Left" VerticalAlignment="Center" />
                             <TextBlock Text="100%" x:Name="ZoomPercentage" VerticalAlignment="Top" Canvas.Left="256" Canvas.Top="29" HorizontalAlignment="Center" />
                         </Canvas>

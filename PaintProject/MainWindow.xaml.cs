@@ -49,7 +49,7 @@ namespace PaintProject
         private bool isRotate = false;
 
         private IShape selectedShape = null;
-        private UIElement sampleUI = null;
+        private Canvas sampleUI = null;
         private Color selectedShapeColor;
         private int selectedShapeThickness = 0;
         private bool isFirstSelected = false;
@@ -69,6 +69,7 @@ namespace PaintProject
         private Point originalCoor;
         private Point anchorPoint;
         private Point startRotatePoint;
+        private RecentFilesManager recentFilesManager;
 
         private bool erasering = false;
         public MainWindow()
@@ -79,6 +80,8 @@ namespace PaintProject
             moveCursor = new Cursor($"{folderInfo}\\move.cur");
             rotateCursor = new Cursor($"{folderInfo}\\rotate.cur");
             eraserCursor = new Cursor($"{folderInfo}\\eraser.cur");
+            recentFilesManager=new RecentFilesManager();
+            recentFilesManager.LoadRecentFiles();
         }
 
         private void startingDrawing(object sender, MouseButtonEventArgs e)
@@ -328,6 +331,7 @@ namespace PaintProject
                 HitTestResult hitTestResult = VisualTreeHelper.HitTest(mainPaper, mouseCoor);
                 if (hitTestResult != null && hitTestResult.VisualHit != null)
                 {
+
                     var clickedEle = hitTestResult.VisualHit as UIElement;
                     var top = Canvas.GetTop(clickedEle);
                     var left = Canvas.GetLeft(clickedEle);
@@ -336,6 +340,10 @@ namespace PaintProject
                         var line = (Line)clickedEle;
                         left = line.X1;
                         top = line.Y1;
+                    }
+                    if (clickedEle is Rectangle || clickedEle is Image)
+                    {
+                        mainPaper.Children.Remove(clickedEle);
                     }
                     var ishapeSelected = listDrewShapes.FirstOrDefault(shape => shape.Start == new Point(left, top));
                     if(ishapeSelected != null) { 
@@ -388,7 +396,7 @@ namespace PaintProject
                 border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
             }
         }
-       
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.PreviewKeyDown += Window_PreviewKeyDown;
@@ -396,6 +404,7 @@ namespace PaintProject
 
             this.PreviewKeyUp += Window_PreviewKeyUp;
             this.KeyDown += MainWindow_KeyDown;
+            this.DataContext = recentFilesManager.RecentFiles;
             var domain = AppDomain.CurrentDomain;
             var folder = domain.BaseDirectory;
 
@@ -417,6 +426,12 @@ namespace PaintProject
                         _abilities.Add(shape!.name, shape);
                     }
                 }
+            }
+            if (_abilities.Count == 0)
+            {
+                var dialog = MessageBox.Show("No possibility drawings found. Please add more ability dll!!!", "No ability found",MessageBoxButton.OK,MessageBoxImage.Error);
+                if(dialog == MessageBoxResult.OK)
+                    System.Windows.Application.Current.Shutdown();
             }
             bool ischecked = true;
             foreach (var ability in _abilities)
@@ -464,7 +479,7 @@ namespace PaintProject
             try
             {
                 var x = PointToScreen(pointInApp).X;
-                var y = PointToScreen(pointInApp).Y + ribbon.ActualHeight;
+                var y = PointToScreen(pointInApp).Y + ribbon.ActualHeight + header.ActualHeight;
                 return new Point(x, y);
             }
             catch
@@ -624,6 +639,15 @@ namespace PaintProject
         {
             RadColorPicker colorPicker = sender as RadColorPicker;
             selectedColor = colorPicker.SelectedColor;
+            if(isSelectionMode && selectedShape != null) {
+                mainPaper.Children.Remove(lastDraw);
+                mainPaper.Children.Remove(sampleUI);
+                var newDrawColor = selectedShape.Draw(selectedColor, selectedShapeThickness, selectedShape.StrokeDashArray, false, selectedShape.rotateAngle);
+                selectedShapeColor = selectedColor;
+                mainPaper.Children.Add(newDrawColor);
+                mainPaper.Children.Add(sampleUI);
+                lastDraw = newDrawColor;
+            }
 
         }
 
@@ -635,9 +659,18 @@ namespace PaintProject
             else if(i == 2) thickness = 5;
             else if(i == 3) thickness = 8;
             weightInfo.Text = thickness.ToString() + "px";
-        }
 
-       
+            if (isSelectionMode && selectedShape != null)
+            {
+                mainPaper.Children.Remove(sampleUI);
+                mainPaper.Children.Remove(lastDraw);
+                var newDrawColor = selectedShape.Draw(selectedShapeColor, thickness, selectedShape.StrokeDashArray, false, selectedShape.rotateAngle);
+                selectedShapeThickness = thickness;
+                mainPaper.Children.Add(newDrawColor);
+                mainPaper.Children.Add(sampleUI);
+                lastDraw = newDrawColor;
+            }
+        }
 
         private void ChangeStroke(object sender, SelectionChangedEventArgs e)
         {
@@ -662,6 +695,16 @@ namespace PaintProject
                 strokeSelect.Text = "Dash Dot Dot";
                 stroke = new DoubleCollection() { 4, 1, 1, 1, 1, 1 };
             }
+
+            if (isSelectionMode && selectedShape != null)
+            {
+                mainPaper.Children.Remove(sampleUI);
+                mainPaper.Children.Remove(lastDraw);
+                var newDrawColor = selectedShape.Draw(selectedShapeColor, thickness, stroke, false, selectedShape.rotateAngle);
+                mainPaper.Children.Add(newDrawColor);
+                mainPaper.Children.Add(sampleUI);
+                lastDraw = newDrawColor;
+            }
         }
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
@@ -669,6 +712,7 @@ namespace PaintProject
             if (haveImageOrFill)
             {
                 ExportImageFile(new PngBitmapEncoder());
+                isFileSave = true;
             }
             else
             {
@@ -683,6 +727,7 @@ namespace PaintProject
 
                     WriteObjectListToFile(curFilePath, listDrewShapes);
                     isFileSave = true;
+                    recentFilesManager.AddRecentFile(Path.GetFileName(saveFileDialog.FileName), saveFileDialog.FileName);
                 }
                 else
                 {
@@ -774,6 +819,8 @@ namespace PaintProject
                             MessageBox.Show(ex.Message);
                         }
                     }
+                    recentFilesManager.AddRecentFile(Path.GetFileName(openFileDialog.FileName), openFileDialog.FileName);
+
 
                 }
             }
@@ -786,6 +833,7 @@ namespace PaintProject
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.DefaultExt = encoder.GetType().ToString().ToLower().Replace("bitmapencoder", "");
             saveFileDialog.FileName = "paint";
+            saveFileDialog.Filter = "Files|*.jpg;*.png";
             saveFileDialog.OverwritePrompt = true;
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -794,6 +842,7 @@ namespace PaintProject
                     using (FileStream fs = File.Create(saveFileDialog.FileName))
                     {
                         encoder.Save(fs);
+                        recentFilesManager.AddRecentFile(Path.GetFileName(saveFileDialog.FileName),saveFileDialog.FileName);
                     }
                 }catch(Exception ex)
                 {
@@ -912,7 +961,7 @@ namespace PaintProject
             }
             else
             {
-                mainPaper.Background= null;
+                mainPaper.Background= new SolidColorBrush(Colors.White);
                 
             }
 
@@ -1078,6 +1127,75 @@ namespace PaintProject
                 Border border = RedoButton.FindChildByType<Border>();
                 border.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
             }
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            recentFilesManager.SaveRecentFiles();
+
+        }
+        private void OnRecentFileClicked(object sender, RoutedEventArgs e)
+        {
+            var buttonSend = (RadRibbonButton)sender;
+            var recentFile = (RecentFile)buttonSend.DataContext;
+            var filePath = recentFile.FilePath;
+            if (!isFileSave && listDrewShapes.Count > 0)
+            {
+                string messageBoxText = "Do you want to save changes?";
+                string caption = "Save file";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+                MessageBoxResult result;
+
+                result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.Yes);
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveBtn_Click(sender, e);
+                }
+                else
+                {
+                    isFileSave = true;
+                    OnRecentFileClicked(sender: this, e: e);
+
+                }
+            }
+            else
+            {
+                string ext = Path.GetExtension(filePath).ToLower().Replace(".", "");
+                if (ext == "jpg" || ext == "png" || ext == "bmp")
+                {
+                    mainPaper.Children.Clear();
+
+                    haveImageOrFill = true;
+                    BitmapImage bitmap = new BitmapImage(new Uri(filePath));
+                    double width = bitmap.Width;
+                    double height = bitmap.Height;
+                    mainPaper.Width = width;
+                    mainPaper.Height = height;
+                    ImageBrush imageBrush = new ImageBrush();
+                    imageBrush.ImageSource = bitmap;
+                    mainPaper.Background = imageBrush;
+                }
+                else
+                {
+                    try
+                    {
+                        mainPaper.Background = new SolidColorBrush(Colors.White);
+                        mainPaper.Children.Clear();
+                        listDrewShapes = ReadObjectListFromFile(filePath);
+                        foreach (var shape in listDrewShapes)
+                        {
+                            UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle);
+                            mainPaper.Children.Add(drawshape);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+            }
+            ribbon.IsBackstageOpen = false;
         }
     }
 }

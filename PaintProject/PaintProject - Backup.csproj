@@ -6,8 +6,7 @@
     <RootNamespace>PaintProject</RootNamespace>
     <EnableDefaultItems>False</EnableDefaultItems>
     <BaseOutputPath></BaseOutputPath>
-    <Platforms>AnyCPU;x64</Platforms>
-    <ApplicationIcon>paint.ico</ApplicationIcon>
+    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -49,7 +48,6 @@
     <Content Include="Fonts\Lato-Thin.ttf" />
     <Content Include="Fonts\Lato-ThinItalic.ttf" />
     <Content Include="Fonts\OFL.txt" />
-    <Content Include="paint.ico" />
     <Resource Include="data\recent_files.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

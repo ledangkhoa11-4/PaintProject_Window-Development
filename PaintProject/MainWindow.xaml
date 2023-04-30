@@ -5,11 +5,111 @@
                 xmlns:svg="http://schemas.squidex.io/schemas/svg"
                 Title="MainWindow" Height="800" Width="1400"
                 WindowStartupLocation="CenterScreen"
-        Loaded="Window_Loaded">
+                WindowStyle="None"
+                Loaded="Window_Loaded"
+                Closed="Window_Closed"
+                >
 
 
 
     <DockPanel LastChildFill="True" Background="Gray">
+        <Border DockPanel.Dock="Top" Height="30" Background="White">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button x:Name="UndoButton" Click="UndoClick" IsEnabled="False" Grid.Column="0" >
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Border x:Name="UndoBorder" BorderBrush="White">
+                                <Image Source="/Images/undo.png" x:Name="Image" Width="17" Height="17"></Image>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="UndoBorder" Property="Background" Value="#2898ac" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button x:Name="RedoButton" Click="RedoClick" IsEnabled="False" Grid.Column="1">
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Border x:Name="RedoBorder" BorderBrush="White">
+                                <Image Source="/Images/redo.png" x:Name="Image" Width="17" Height="17"></Image>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="RedoBorder" Property="Background" Value="#2898ac" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Button Grid.Column="0">
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border x:Name="Border" BorderBrush="White">
+                                    <Image Source="/Images/redo.png" x:Name="Image" Width="17" Height="17"></Image>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#2898ac" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Button>
+                <TextBlock Grid.Column="2" Padding="10,5,0,0" Text="MainWindow" />
+                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                    <Button Click="MinimizeWindow" Width="35">
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border x:Name="Border" BorderBrush="White" Background="White">
+                                    <TextBlock Text="__" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#D3D3D3" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Click="MaximizeWindow" Width="35" Background="White">
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border x:Name="Border" BorderBrush="White" Background="White">
+                                    <TextBlock Text="[]" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#D3D3D3" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Click="CloseWindow" Width="35" Background="White">
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border x:Name="Border" BorderBrush="White" Background="White">
+                                    <TextBlock Text="X" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#ff0000" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
         <telerik:RadRibbonView x:Name="ribbon" ApplicationButtonContent="File" Panel.ZIndex="99999" DockPanel.Dock="Top" telerik:StyleManager.Theme="Office2019" ApplicationName="Paint Application" TitleBarVisibility="Collapsed">
             <telerik:RadRibbonView.Items>
                 <telerik:RadRibbonTab Header="Home">
@@ -192,7 +292,87 @@
 
                         </StackPanel>
                     </telerik:RadRibbonBackstageItem>
-                    <telerik:RadRibbonBackstageItem Name="OpenFileBtn" Header="Open" Click="OpenFileBtn_Click" Icon="images/open.png"  FontSize="24" IsSelectable="False" CloseOnClick="False" />
+                    <telerik:RadRibbonBackstageItem Name="OpenFileBtn" Header="Open"  Icon="images/open.png"  FontSize="24"  CloseOnClick="False" >
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="400" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="15 15 0 0" Grid.Column="0">
+                                <TextBlock Margin="0 0 0 2"  
+                                    FontSize="14" 
+                                    FontWeight="Bold" 
+                                    Text="Other Location: " />
+                                <Rectangle Height="1">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush MappingMode="Absolute" SpreadMethod="Repeat" StartPoint="0,0.5" EndPoint="4,0.5">
+                                            <GradientStop Offset="0" Color="#40000000" />
+                                            <GradientStop Offset="0.5" Color="#40000000" />
+                                            <GradientStop Offset="0.501" Color="Transparent" />
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <ItemsControl Margin="0 4 0 0">
+                                    <telerik:RadRibbonButton  HorizontalContentAlignment="Left" Click="OpenFileBtn_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            
+                                            <StackPanel Margin="3 0 3 0" HorizontalAlignment="Left" Orientation="Horizontal">
+                                                <Image Margin="0 0 5 4" Source="images/folder.png" Width="24" Height="24"></Image>
+                                                <TextBlock  Text="Browse" FontSize="24" />
+                                                
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </telerik:RadRibbonButton>
+                                    
+                                </ItemsControl>
+                            </StackPanel>
+                            <Rectangle Grid.Column="1"  
+                                Width="1" 
+                                Margin="10, 5">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                        <GradientStop Offset="0" Color="#10000000" />
+                                        <GradientStop Offset="0.15" Color="#40000000" />
+                                        <GradientStop Offset="0.95" Color="#40000000" />
+                                        <GradientStop Offset="1" Color="#10000000" />
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <StackPanel Grid.Column="2" Margin="5 15 7 0">
+                                <TextBlock Margin="0 0 0 2"  
+                                    FontSize="14" 
+                                    FontWeight="Bold" 
+                                    Text="Recent files: " />
+                                <Rectangle Height="1">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush MappingMode="Absolute" SpreadMethod="Repeat" StartPoint="0,0.5" EndPoint="4,0.5">
+                                            <GradientStop Offset="0" Color="#40000000" />
+                                            <GradientStop Offset="0.5" Color="#40000000" />
+                                            <GradientStop Offset="0.501" Color="Transparent" />
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <ItemsControl Margin="0 4 10 0" ItemsSource="{Binding}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <telerik:RadRibbonButton  HorizontalContentAlignment="Left" Click="OnRecentFileClicked">
+                                                <StackPanel Orientation="Horizontal" >
+                                                    <Image Width="50" Height="58" Source="Images/Document.png" />
+                                                    <StackPanel Margin="3 0 0 0" HorizontalAlignment="Left" Width="600" >
+                                                        <TextBlock Margin="0 0 0 2" Text="{Binding FileName}" />
+                                                        <TextBlock Foreground="DimGray" Text="{Binding FilePath}" TextWrapping="Wrap" FontSize="18"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </telerik:RadRibbonButton>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                    
+                                
+                                </ItemsControl>
+                            </StackPanel>
+                        </Grid>
+                    </telerik:RadRibbonBackstageItem>
                     <telerik:RadRibbonBackstageItem  Name="NewFileBtn" Click="NewFileBtn_Click" Header="New"  FontSize="24" Icon="images/new.png" IsSelectable="False" CloseOnClick="False"/>
 
                 </telerik:RadRibbonBackstage>

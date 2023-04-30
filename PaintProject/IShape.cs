@@ -11,6 +11,7 @@ namespace PaintProject
         public Point End { get; set; }
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
+        public bool ShiftKey { get; set; }
         public DoubleCollection StrokeDashArray { get; set; }
         public int rotateAngle { get; set; }
         void UpdateStart(Point p);

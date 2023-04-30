@@ -26,11 +26,12 @@ namespace RectangleAbility
         }
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
-
+        public bool ShiftKey { get; set; }
         public UIElement Draw(Color color, int thickness,DoubleCollection stroke, bool isShiftKeyPressed=false, int angle = 0)
         {
             ColorDrew = color;
             ThicknessDrew = thickness;
+            ShiftKey = isShiftKeyPressed;
             if (stroke != null) { StrokeDashArray = stroke; }
             else { stroke = StrokeDashArray; }
             double width = Math.Abs(End.X - Start.X);

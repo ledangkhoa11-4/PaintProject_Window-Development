@@ -60,7 +60,7 @@
                         </Button.Template>
                     </Button>
                 </Button>
-                <TextBlock Grid.Column="2" Padding="10,5,0,0" Text="Paint Appli" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" Padding="10,5,0,0" Text="Paint Application" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="3" Orientation="Horizontal">
                     <Button Click="MinimizeWindow" Width="35">
                         <Button.Template>
@@ -377,7 +377,7 @@
         </telerik:RadRibbonView>
 
         <ScrollViewer Name="scrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <Canvas x:Name="mainPaper" Background="White" 
+            <Canvas ClipToBounds="True" x:Name="mainPaper" Background="White" 
                 MouseDown="startingDrawing" MouseMove="drawing" MouseUp="stopDrawing" PreviewMouseWheel="mainPaper_PreviewMouseWheel"
                 Width="{Binding ActualWidth, ElementName=scrollViewer}" Height="{Binding ActualHeight, ElementName=scrollViewer}">
                 <Canvas.LayoutTransform>

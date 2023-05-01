@@ -17,6 +17,7 @@ using Microsoft.Win32;
 using Path = System.IO.Path;
 using Newtonsoft.Json;
 using System.Windows.Media.Imaging;
+using System.Text;
 
 namespace PaintProject
 {
@@ -726,9 +727,35 @@ namespace PaintProject
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
+            if (isFileSave) { return; }
             if (haveImageOrFill)
             {
-                ExportImageFile(new PngBitmapEncoder());
+                if (curFilePath == "")
+                {
+                    ExportImageFile(new PngBitmapEncoder());
+                }
+                else
+                {
+                    var encoder= new PngBitmapEncoder();
+                    RenderTargetBitmap rtb = new RenderTargetBitmap((int)mainPaper.ActualWidth, (int)mainPaper.ActualHeight, 96d, 96d, PixelFormats.Default);
+                    rtb.Render(mainPaper);
+                    encoder.Frames.Add(BitmapFrame.Create(rtb));
+                    try
+                    {
+                       
+                        using (FileStream stream = new FileStream(curFilePath, FileMode.Create, FileAccess.Write))
+                        {
+                            // Save the encoder to the stream
+                            encoder.Save(stream);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error saving file: " + ex.Message);
+                    }
+                    
+                    
+                }
                 isFileSave = true;
             }
             else
@@ -808,25 +835,32 @@ namespace PaintProject
             else
             {
                 var openFileDialog = new OpenFileDialog();
-                openFileDialog.Filter = "Files|*.bin;*.dat;*.dkpq;*.jpg;*.png;*.bmp";
+                openFileDialog.Filter = "Files|*.bin;*.dat;*.dkpq;*.jpeg;*.png;*.bmp";
                 if (openFileDialog.ShowDialog() == true)
                 {
                     curFilePath= openFileDialog.FileName;
                     Title = Path.GetFileName(openFileDialog.FileName) + "- Paint";
                     string ext = Path.GetExtension(openFileDialog.FileName).ToLower().Replace(".","");
-                    if (ext == "jpg" || ext == "png" || ext == "bmp")
+                    if (ext == "jpeg" || ext == "png" || ext == "bmp")
                     {
+                        haveImageOrFill= true;
                         mainPaper.Children.Clear();
-                        
-                        haveImageOrFill = true;
-                        BitmapImage bitmap = new BitmapImage(new Uri(openFileDialog.FileName));
-                        double width = bitmap.Width;
-                        double height = bitmap.Height;
-                        mainPaper.Width = width;
-                        mainPaper.Height = height;
-                        ImageBrush imageBrush = new ImageBrush();
-                        imageBrush.ImageSource = bitmap;
-                        mainPaper.Background = imageBrush;
+                        using (FileStream fileStream = new FileStream(curFilePath, FileMode.Open, FileAccess.Read))
+                        {
+                            BitmapImage bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.StreamSource = fileStream;
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmap.EndInit();
+                            double width = bitmap.Width;
+                            double height = bitmap.Height;
+                            mainPaper.Width = width;
+                            mainPaper.Height = height;
+                            ImageBrush imageBrush = new ImageBrush();
+                            imageBrush.ImageSource = bitmap;
+                            mainPaper.Background = imageBrush;
+                        }
+                       
                     }
                     else
                     {
@@ -835,6 +869,8 @@ namespace PaintProject
                             mainPaper.Background = new SolidColorBrush(Colors.White);
                             mainPaper.Children.Clear();
                             listDrewShapes = ReadObjectListFromFile(openFileDialog.FileName);
+
+                            haveImageOrFill = false;
                             foreach (var shape in listDrewShapes)
                             {
                                 UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle, shape.Text);
@@ -871,7 +907,8 @@ namespace PaintProject
                     using (FileStream fs = File.Create(saveFileDialog.FileName))
                     {
                         encoder.Save(fs);
-                        recentFilesManager.AddRecentFile(Path.GetFileName(saveFileDialog.FileName),saveFileDialog.FileName);
+                        
+
                     }
                 }catch(Exception ex)
                 {
@@ -983,6 +1020,12 @@ namespace PaintProject
                 if (result == MessageBoxResult.Yes)
                 {
                     SaveBtn_Click(sender, e);
+                    mainPaper.Children.Clear();
+                    listDrewShapes.Clear();
+                    isFileSave= false;
+                    haveImageOrFill= false;
+                    mainPaper.Background = new SolidColorBrush(Colors.White);
+                    curFilePath = "";
                 }
                 else
                 {
@@ -993,8 +1036,13 @@ namespace PaintProject
             }
             else
             {
-                mainPaper.Background= new SolidColorBrush(Colors.White);
-                
+                mainPaper.Children.Clear();
+                listDrewShapes.Clear();
+                mainPaper.Background = new SolidColorBrush(Colors.White);
+                isFileSave = false;
+                haveImageOrFill = false;
+                curFilePath = "";
+
             }
 
         }
@@ -1164,6 +1212,7 @@ namespace PaintProject
         private void Window_Closed(object sender, EventArgs e)
         {
             recentFilesManager.SaveRecentFiles();
+            
 
         }
         private void OnRecentFileClicked(object sender, RoutedEventArgs e)
@@ -1186,27 +1235,35 @@ namespace PaintProject
                 }
                 else
                 {
+
                     isFileSave = true;
-                    OnRecentFileClicked(sender: this, e: e);
+                    OnRecentFileClicked(sender, e);
 
                 }
             }
             else
             {
                 string ext = Path.GetExtension(filePath).ToLower().Replace(".", "");
-                if (ext == "jpg" || ext == "png" || ext == "bmp")
+                curFilePath= filePath;
+                if (ext == "jpeg" || ext == "png" || ext == "bmp")
                 {
-                    mainPaper.Children.Clear();
-
                     haveImageOrFill = true;
-                    BitmapImage bitmap = new BitmapImage(new Uri(filePath));
-                    double width = bitmap.Width;
-                    double height = bitmap.Height;
-                    mainPaper.Width = width;
-                    mainPaper.Height = height;
-                    ImageBrush imageBrush = new ImageBrush();
-                    imageBrush.ImageSource = bitmap;
-                    mainPaper.Background = imageBrush;
+                    mainPaper.Children.Clear();
+                    using (FileStream fileStream = new FileStream(curFilePath, FileMode.Open, FileAccess.Read))
+                    {
+                        BitmapImage bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.StreamSource = fileStream;
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.EndInit();
+                        double width = bitmap.Width;
+                        double height = bitmap.Height;
+                        mainPaper.Width = width;
+                        mainPaper.Height = height;
+                        ImageBrush imageBrush = new ImageBrush();
+                        imageBrush.ImageSource = bitmap;
+                        mainPaper.Background = imageBrush;
+                    }
                 }
                 else
                 {
@@ -1215,7 +1272,7 @@ namespace PaintProject
                         mainPaper.Background = new SolidColorBrush(Colors.White);
                         mainPaper.Children.Clear();
                         listDrewShapes = ReadObjectListFromFile(filePath);
-                        Debug.WriteLine(listDrewShapes.Count);
+                        haveImageOrFill = false;
                         foreach (var shape in listDrewShapes)
                         {
                             UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle, shape.Text);
@@ -1230,8 +1287,6 @@ namespace PaintProject
             }
             ribbon.IsBackstageOpen = false;
         }
-
-       
     }
 }
   

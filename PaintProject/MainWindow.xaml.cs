@@ -252,6 +252,7 @@ namespace PaintProject
             }
             isDrawing = true;
             startPoint = mouseCoor;
+            
             shape.UpdateStart(startPoint);
             mainPaper.CaptureMouse();
         }
@@ -332,10 +333,12 @@ namespace PaintProject
                 HitTestResult hitTestResult = VisualTreeHelper.HitTest(mainPaper, mouseCoor);
                 if (hitTestResult != null && hitTestResult.VisualHit != null)
                 {
-
+                    
                     var clickedEle = hitTestResult.VisualHit as UIElement;
+                    
                     var top = Canvas.GetTop(clickedEle);
                     var left = Canvas.GetLeft(clickedEle);
+                   
                     if (clickedEle is Line)
                     {
                         var line = (Line)clickedEle;
@@ -359,10 +362,10 @@ namespace PaintProject
             if (isDrawing)
             {
                 isDrawing = false;
-                
                 mainPaper.ReleaseMouseCapture();
                 listDrewShapes.Add((IShape)shape.Clone());
-                isFileSave= false;
+
+                isFileSave = false;
                 lastDraw = null;
             }
            
@@ -873,7 +876,7 @@ namespace PaintProject
                             haveImageOrFill = false;
                             foreach (var shape in listDrewShapes)
                             {
-                                UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle, shape.Text);
+                                UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle);
                                 mainPaper.Children.Add(drawshape);
                             }
                         }
@@ -1275,7 +1278,8 @@ namespace PaintProject
                         haveImageOrFill = false;
                         foreach (var shape in listDrewShapes)
                         {
-                            UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle, shape.Text);
+                            Debug.WriteLine(shape.Text);
+                            UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle);
                             mainPaper.Children.Add(drawshape);
                         }
                     }

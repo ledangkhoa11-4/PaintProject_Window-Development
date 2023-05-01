@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Windows;
 using PaintProject;
 using System.Diagnostics;
+using System.Windows.Shapes;
 
 namespace TextAbility
 {

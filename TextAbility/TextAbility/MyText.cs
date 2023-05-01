@@ -41,7 +41,7 @@ namespace TextAbility
             {
                 Text = data,
                 BorderBrush = new SolidColorBrush(ColorDrew),
-                BorderThickness = new Thickness(1),
+                BorderThickness = new Thickness(thickness),
                 Background = Brushes.Transparent,
                 TextWrapping= TextWrapping.Wrap,
             };

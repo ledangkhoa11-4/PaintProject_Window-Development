@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <Reference Include="PaintProject">
-      <HintPath>..\..\..\PaintProject_Window-Development\PaintProject\bin\Debug\net7.0-windows\PaintProject.dll</HintPath>
+      <HintPath>..\..\PaintProject\bin\Debug\net7.0-windows\PaintProject.dll</HintPath>
     </Reference>
   </ItemGroup>
 

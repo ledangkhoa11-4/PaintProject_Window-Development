@@ -363,8 +363,11 @@ namespace PaintProject
             {
                 isDrawing = false;
                 mainPaper.ReleaseMouseCapture();
+                if (mainPaper.Children.Count < listDrewShapes.Count)
+                {
+                    listDrewShapes.RemoveRange(mainPaper.Children.Count - 1, listDrewShapes.Count - mainPaper.Children.Count + 1);
+                }
                 listDrewShapes.Add((IShape)shape.Clone());
-
                 isFileSave = false;
                 lastDraw = null;
             }

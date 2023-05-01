@@ -12,7 +12,7 @@ namespace LineAbility
         public Point Start { get; set; }
         public Point End { get; set; }
 
-
+        public string Text { get; set; } //do not use
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
         public bool ShiftKey { get; set; }
@@ -28,7 +28,7 @@ namespace LineAbility
             End = p;
         }
 
-        public UIElement Draw(Color color, int thickness,DoubleCollection stroke = null,bool isShiftKeyPressed = false, int angle = 0)
+        public UIElement Draw(Color color, int thickness,DoubleCollection stroke = null,bool isShiftKeyPressed = false, int angle = 0, string data = "")
         {
             ColorDrew = color;
             ThicknessDrew = thickness;

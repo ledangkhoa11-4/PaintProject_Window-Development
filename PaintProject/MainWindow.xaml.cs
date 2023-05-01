@@ -262,7 +262,7 @@ namespace PaintProject
             {
                 endPoint = mouseCoor;
                 shape.UpdateEnd(endPoint);
-                UIElement drawShape = shape.Draw(selectedColor, thickness, stroke, isShiftKeyPressed);
+                UIElement drawShape = shape.Draw(selectedColor, thickness, stroke, isShiftKeyPressed, 0,"");
                 drawShape.MouseUp += stopDrawing;
                 if (lastDraw == null) //first Drawing
                 {
@@ -358,7 +358,7 @@ namespace PaintProject
             if (isDrawing)
             {
                 isDrawing = false;
-                Debug.WriteLine("Stop");
+                
                 mainPaper.ReleaseMouseCapture();
                 listDrewShapes.Add((IShape)shape.Clone());
                 isFileSave= false;
@@ -410,9 +410,7 @@ namespace PaintProject
 
             var folderInfo = new DirectoryInfo(folder);
 
-            Debug.WriteLine($"{folderInfo}");
             var dllFiles = folderInfo.GetFiles("*Ability*.dll");
-            Debug.WriteLine(dllFiles.Length);
             foreach (var dll in dllFiles)
             {
                 var assembly = Assembly.LoadFrom(dll.FullName);
@@ -423,6 +421,7 @@ namespace PaintProject
                         typeof(IShape).IsAssignableFrom(type))
                     {
                         var shape = Activator.CreateInstance(type) as IShape;
+                        Debug.WriteLine(shape.name);
                         _abilities.Add(shape!.name, shape);
                     }
                 }
@@ -451,17 +450,35 @@ namespace PaintProject
                 if (ischecked) ischecked = false;
                 StyleManager.SetTheme(button, new MaterialTheme());
 
-                var image32 = new BitmapImage();
-                image32.BeginInit();
-                image32.UriSource = new Uri(folder + $"shapes_icon/{ability.Key.ToLower()}_32.png", UriKind.Absolute);
-                image32.EndInit();
-                button.LargeImage = image32;
+                try
+                {
+                    var image32 = new BitmapImage();
+                    image32.BeginInit();
+                    image32.UriSource = new Uri(folder + $"shapes_icon/{ability.Key.ToLower()}_32.png", UriKind.Absolute);
+                    image32.EndInit();
+                    button.LargeImage = image32;
 
-                var image16 = new BitmapImage();
-                image16.BeginInit();
-                image16.UriSource = new Uri(folder + $"shapes_icon/{ability.Key.ToLower()}_16.png", UriKind.Absolute);
-                image16.EndInit();
-                button.SmallImage = image16;
+                    var image16 = new BitmapImage();
+                    image16.BeginInit();
+                    image16.UriSource = new Uri(folder + $"shapes_icon/{ability.Key.ToLower()}_16.png", UriKind.Absolute);
+                    image16.EndInit();
+                    button.SmallImage = image16;
+                }
+                catch
+                {
+                    var image32 = new BitmapImage();
+                    image32.BeginInit();
+                    image32.UriSource = new Uri(folder + $"shapes_icon/default_32.png", UriKind.Absolute);
+                    image32.EndInit();
+                    button.LargeImage = image32;
+
+                    var image16 = new BitmapImage();
+                    image16.BeginInit();
+                    image16.UriSource = new Uri(folder + $"shapes_icon/default_16.png", UriKind.Absolute);
+                    image16.EndInit();
+                    button.SmallImage = image16;
+                }
+
 
                 button.Click += chooseShape;
                 shapes.Items.Add(button);
@@ -820,7 +837,7 @@ namespace PaintProject
                             listDrewShapes = ReadObjectListFromFile(openFileDialog.FileName);
                             foreach (var shape in listDrewShapes)
                             {
-                                UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle);
+                                UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle, shape.Text);
                                 mainPaper.Children.Add(drawshape);
                             }
                         }
@@ -1198,9 +1215,10 @@ namespace PaintProject
                         mainPaper.Background = new SolidColorBrush(Colors.White);
                         mainPaper.Children.Clear();
                         listDrewShapes = ReadObjectListFromFile(filePath);
+                        Debug.WriteLine(listDrewShapes.Count);
                         foreach (var shape in listDrewShapes)
                         {
-                            UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle);
+                            UIElement drawshape = shape.Draw(shape.ColorDrew, shape.ThicknessDrew, shape.StrokeDashArray, false, shape.rotateAngle, shape.Text);
                             mainPaper.Children.Add(drawshape);
                         }
                     }
@@ -1212,6 +1230,8 @@ namespace PaintProject
             }
             ribbon.IsBackstageOpen = false;
         }
+
+       
     }
 }
   

@@ -50,6 +50,12 @@
     <Content Include="Fonts\Lato-ThinItalic.ttf" />
     <Content Include="Fonts\OFL.txt" />
     <Content Include="paint.ico" />
+    <Content Include="shapes_icon\default_16.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shapes_icon\default_32.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Resource Include="data\recent_files.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

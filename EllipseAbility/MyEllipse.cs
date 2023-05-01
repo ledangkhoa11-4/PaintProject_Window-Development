@@ -27,8 +27,8 @@ namespace EllipseAbility
         {
             End = p;
         }
-
-        public UIElement Draw(Color color, int thickness,DoubleCollection stroke = null, bool isShiftKeyPressed=false, int angle = 0)
+        public string Text { get; set; } //do not use
+        public UIElement Draw(Color color, int thickness,DoubleCollection stroke = null, bool isShiftKeyPressed=false, int angle = 0, string data = "")
         {
             ColorDrew = color;
             ThicknessDrew = thickness;

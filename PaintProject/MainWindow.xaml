@@ -313,15 +313,15 @@
                                 <ItemsControl Margin="0 4 0 0">
                                     <telerik:RadRibbonButton  HorizontalContentAlignment="Left" Click="OpenFileBtn_Click">
                                         <StackPanel Orientation="Horizontal">
-                                            
+
                                             <StackPanel Margin="3 0 3 0" HorizontalAlignment="Left" Orientation="Horizontal">
                                                 <Image Margin="0 0 5 4" Source="images/folder.png" Width="24" Height="24"></Image>
                                                 <TextBlock  Text="Browse" FontSize="24" />
-                                                
+
                                             </StackPanel>
                                         </StackPanel>
                                     </telerik:RadRibbonButton>
-                                    
+
                                 </ItemsControl>
                             </StackPanel>
                             <Rectangle Grid.Column="1"  
@@ -364,8 +364,8 @@
                                             </telerik:RadRibbonButton>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
-                                    
-                                
+
+
                                 </ItemsControl>
                             </StackPanel>
                         </Grid>

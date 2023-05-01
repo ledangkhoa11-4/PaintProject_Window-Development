@@ -27,7 +27,8 @@ namespace RectangleAbility
         public Color ColorDrew { get; set; }
         public int ThicknessDrew { get; set; }
         public bool ShiftKey { get; set; }
-        public UIElement Draw(Color color, int thickness,DoubleCollection stroke, bool isShiftKeyPressed=false, int angle = 0)
+        public string Text { get; set; } //do not use
+        public UIElement Draw(Color color, int thickness,DoubleCollection stroke, bool isShiftKeyPressed=false, int angle = 0, string data = "")
         {
             ColorDrew = color;
             ThicknessDrew = thickness;

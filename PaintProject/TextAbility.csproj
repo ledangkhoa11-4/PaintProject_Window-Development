@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="PaintProject">
+      <HintPath>..\..\..\PaintProject_Window-Development\PaintProject\bin\Debug\net7.0-windows\PaintProject.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

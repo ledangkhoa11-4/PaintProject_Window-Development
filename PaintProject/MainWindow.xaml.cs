@@ -71,6 +71,7 @@ namespace PaintProject
         private Point anchorPoint;
         private Point startRotatePoint;
         private RecentFilesManager recentFilesManager;
+        private List<IShape> listUndoShape = new List<IShape>();
 
         private bool erasering = false;
         public MainWindow()
@@ -348,11 +349,14 @@ namespace PaintProject
                     if (clickedEle is Rectangle || clickedEle is Image)
                     {
                         mainPaper.Children.Remove(clickedEle);
+
                     }
                     var ishapeSelected = listDrewShapes.FirstOrDefault(shape => shape.Start == new Point(left, top));
                     if(ishapeSelected != null) { 
                         listDrewShapes.Remove(ishapeSelected);
                         mainPaper.Children.Remove(clickedEle);
+                        listUndoShape.Add(ishapeSelected);
+
                     }
                 }
             }
@@ -1004,7 +1008,7 @@ namespace PaintProject
             {
                 var bitmapImage = new BitmapImage(new Uri(openFileDialog.FileName));
                 var image = new System.Windows.Controls.Image() { Source = bitmapImage, Stretch = Stretch.Fill };
-                image.Width = 500;
+                image.Width = 200;
                 
                 Canvas.SetLeft(image, 0);
                 Canvas.SetTop(image, 0);
@@ -1106,6 +1110,9 @@ namespace PaintProject
                             border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
                         }
                         mainPaper.Children.RemoveAt(mainPaper.Children.Count - 1);
+                        IShape removeShape = listDrewShapes[listDrewShapes.Count - 1];
+                        listDrewShapes.Remove(removeShape);
+                        listUndoShape.Add(removeShape);
                     }
                     if (mainPaper.Children.Count == 0 && UndoButton.IsEnabled)
                     {
@@ -1116,7 +1123,7 @@ namespace PaintProject
                 }
                 else if (e.Key == Key.Y)
                 {
-                    if (mainPaper.Children.Count < listDrewShapes.Count)
+                    if (listUndoShape.Count > 0)
                     {
                         if (UndoButton.IsEnabled == false)
                         {
@@ -1124,12 +1131,14 @@ namespace PaintProject
                             Border border = UndoButton.FindChildByType<Border>();
                             border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
                         }
-                        IShape shapeRedo = listDrewShapes[mainPaper.Children.Count];
+                        IShape shapeRedo = listUndoShape[listUndoShape.Count-1];
                         UIElement temp = shapeRedo.Draw(shapeRedo.ColorDrew, shapeRedo.ThicknessDrew, shapeRedo.StrokeDashArray, shapeRedo.ShiftKey);
+                        listDrewShapes.Add(shapeRedo);
+                        listUndoShape.Remove(shapeRedo);
                         temp.MouseUp += stopDrawing;
                         mainPaper.Children.Add(temp);
                     }
-                    if (mainPaper.Children.Count == listDrewShapes.Count && RedoButton.IsEnabled)
+                    if (listUndoShape.Count > 0 && RedoButton.IsEnabled)
                     {
                         RedoButton.IsEnabled = false;
                         Border border = RedoButton.FindChildByType<Border>();
@@ -1149,6 +1158,9 @@ namespace PaintProject
                     border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
                 }
                 mainPaper.Children.RemoveAt(mainPaper.Children.Count - 1);
+                IShape removeShape = listDrewShapes[listDrewShapes.Count - 1];
+                listDrewShapes.Remove(removeShape);
+                listUndoShape.Add(removeShape);
             }
             if (mainPaper.Children.Count == 0 && UndoButton.IsEnabled)
             {
@@ -1160,7 +1172,7 @@ namespace PaintProject
 
         private void RedoClick(object sender, RoutedEventArgs e)
         {
-            if (mainPaper.Children.Count < listDrewShapes.Count)
+            if (listUndoShape.Count > 0)
             {
                 if (UndoButton.IsEnabled == false)
                 {
@@ -1168,12 +1180,14 @@ namespace PaintProject
                     Border border = UndoButton.FindChildByType<Border>();
                     border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
                 }
-                IShape shapeRedo = listDrewShapes[mainPaper.Children.Count];
+                IShape shapeRedo = listUndoShape[listUndoShape.Count - 1];
                 UIElement temp = shapeRedo.Draw(shapeRedo.ColorDrew, shapeRedo.ThicknessDrew, shapeRedo.StrokeDashArray, shapeRedo.ShiftKey);
+                listDrewShapes.Add(shapeRedo);
+                listUndoShape.Remove(shapeRedo);
                 temp.MouseUp += stopDrawing;
                 mainPaper.Children.Add(temp);
             }
-            if (mainPaper.Children.Count == listDrewShapes.Count && RedoButton.IsEnabled)
+            if (listUndoShape.Count == 0 && RedoButton.IsEnabled)
             {
                 RedoButton.IsEnabled = false;
                 Border border = RedoButton.FindChildByType<Border>();

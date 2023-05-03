@@ -356,7 +356,9 @@ namespace PaintProject
                         listDrewShapes.Remove(ishapeSelected);
                         mainPaper.Children.Remove(clickedEle);
                         listUndoShape.Add(ishapeSelected);
-
+                        RedoButton.IsEnabled = true;
+                        Border border = RedoButton.FindChildByType<Border>();
+                        border.Background = new SolidColorBrush(Color.FromRgb(43, 196, 138));
                     }
                 }
             }

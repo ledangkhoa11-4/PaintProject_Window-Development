@@ -3,7 +3,7 @@
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
                 xmlns:svg="http://schemas.squidex.io/schemas/svg"
-                Title="MainWindow" Height="900" Width="1400"
+                Title="MainWindow" Height="800" Width="1400"
                 WindowStartupLocation="CenterScreen"
                 WindowStyle="None"
                 Loaded="Window_Loaded"
@@ -60,7 +60,7 @@
                         </Button.Template>
                     </Button>
                 </Button>
-                <TextBlock Grid.Column="2" Padding="10,5,0,0" Text="Paint Application" VerticalAlignment="Center" />
+                <TextBlock x:Name="title" Grid.Column="2" Padding="10,5,0,0" Text="Paint Application" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="3" Orientation="Horizontal">
                     <Button Click="MinimizeWindow" Width="35">
                         <Button.Template>

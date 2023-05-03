@@ -363,8 +363,11 @@ namespace PaintProject
             {
                 isDrawing = false;
                 mainPaper.ReleaseMouseCapture();
+                if (mainPaper.Children.Count < listDrewShapes.Count)
+                {
+                    listDrewShapes.RemoveRange(mainPaper.Children.Count - 1, listDrewShapes.Count - mainPaper.Children.Count + 1);
+                }
                 listDrewShapes.Add((IShape)shape.Clone());
-
                 isFileSave = false;
                 lastDraw = null;
             }
@@ -461,12 +464,14 @@ namespace PaintProject
                     image32.UriSource = new Uri(folder + $"shapes_icon/{ability.Key.ToLower()}_32.png", UriKind.Absolute);
                     image32.EndInit();
                     button.LargeImage = image32;
+                    Debug.WriteLine(ability.Key.ToLower());
 
                     var image16 = new BitmapImage();
                     image16.BeginInit();
                     image16.UriSource = new Uri(folder + $"shapes_icon/{ability.Key.ToLower()}_16.png", UriKind.Absolute);
                     image16.EndInit();
                     button.SmallImage = image16;
+                    Debug.WriteLine(ability.Key.ToLower());
                 }
                 catch
                 {
@@ -776,7 +781,7 @@ namespace PaintProject
 
                         WriteObjectListToFile(curFilePath, listDrewShapes);
                         isFileSave = true;
-                        Title = Path.GetFileName(saveFileDialog.FileName) + "- Paint";
+                        title.Text = Path.GetFileName(saveFileDialog.FileName) + "- Paint";
                         recentFilesManager.AddRecentFile(Path.GetFileName(saveFileDialog.FileName), saveFileDialog.FileName);
                     }
                     else
@@ -842,7 +847,7 @@ namespace PaintProject
                 if (openFileDialog.ShowDialog() == true)
                 {
                     curFilePath= openFileDialog.FileName;
-                    Title = Path.GetFileName(openFileDialog.FileName) + "- Paint";
+                    title.Text = Path.GetFileName(openFileDialog.FileName) + "- Paint";
                     string ext = Path.GetExtension(openFileDialog.FileName).ToLower().Replace(".","");
                     if (ext == "jpeg" || ext == "png" || ext == "bmp")
                     {
@@ -906,12 +911,12 @@ namespace PaintProject
                 try
                 {
                     curFilePath= saveFileDialog.FileName;
-                    Title= Path.GetFileName(curFilePath)+"- Paint";
+                    title.Text= Path.GetFileName(curFilePath)+"- Paint";
                     using (FileStream fs = File.Create(saveFileDialog.FileName))
                     {
                         encoder.Save(fs);
-                        
-
+                        recentFilesManager.AddRecentFile(Path.GetFileName(curFilePath), curFilePath);
+                            
                     }
                 }catch(Exception ex)
                 {

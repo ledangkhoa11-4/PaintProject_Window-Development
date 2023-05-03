@@ -8,6 +8,7 @@
     <BaseOutputPath></BaseOutputPath>
     <Platforms>AnyCPU;x64</Platforms>
     <ApplicationIcon>paint.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -123,6 +124,10 @@
     <Content Include="cursors\eraser.cur">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="app.manifest" />
   </ItemGroup>
 
 </Project>
